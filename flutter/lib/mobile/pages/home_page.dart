@@ -90,7 +90,6 @@ class HomePageState extends State<HomePage> {
       }
 
       if (enableStartOnBoot != _enableStartOnBoot) {
-        update = true;
         _enableStartOnBoot = enableStartOnBoot;
       }
   }
