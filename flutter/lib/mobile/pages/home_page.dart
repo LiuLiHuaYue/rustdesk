@@ -55,7 +55,7 @@ class HomePageState extends State<HomePage> {
     if (isAndroid && !bind.isOutgoingOnly()) {
       _pages.addAll([ServerPage()]);
     }
-    //_pages.add(SettingsPage());
+    _pages.add(SettingsPage());
   }
 
   @override
