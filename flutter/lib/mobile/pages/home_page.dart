@@ -25,6 +25,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  var _enableStartOnBoot = false;
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
