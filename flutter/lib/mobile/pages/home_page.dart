@@ -41,10 +41,11 @@ class HomePageState extends State<HomePage> {
   }
 
   @override
-  void initState() async {
+  void initState(){
     super.initState();
     initPages();
-	var enableStartOnBoot =
+	WidgetsBinding.instance.addPostFrameCallback((_) async {
+		var enableStartOnBoot =
           await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
       if (!enableStartOnBoot) {
                   // 1. request kIgnoreBatteryOptimizations
@@ -80,6 +81,7 @@ class HomePageState extends State<HomePage> {
         update = true;
         _enableStartOnBoot = enableStartOnBoot;
       }
+	}
   }
 
   void initPages() {
