@@ -25,7 +25,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  var _enableStartOnBoot = false;
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
@@ -41,47 +40,9 @@ class HomePageState extends State<HomePage> {
   }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     initPages();
-	WidgetsBinding.instance.addPostFrameCallback((_) async {
-		var enableStartOnBoot =
-          await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
-      if (!enableStartOnBoot) {
-                  // 1. request kIgnoreBatteryOptimizations
-                  if (!await AndroidPermissionManager.check(
-                      kRequestIgnoreBatteryOptimizations)) {
-                    if (!await AndroidPermissionManager.request(
-                        kRequestIgnoreBatteryOptimizations)) {
-                      return;
-                    }
-                  }
-
-                  // 2. request kSystemAlertWindow
-                  if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-                    if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
-                      return;
-                    }
-                  }
-
-                  // (Optional) 3. request input permission
-                }
-                setState(() => _enableStartOnBoot = true);
-                gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
-                enableStartOnBoot = true;
-
-      if (enableStartOnBoot) {
-        if (!await canStartOnBoot()) {
-          enableStartOnBoot = false;
-          gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
-        }
-      }
-
-      if (enableStartOnBoot != _enableStartOnBoot) {
-        update = true;
-        _enableStartOnBoot = enableStartOnBoot;
-      }
-	}
   }
 
   void initPages() {
@@ -188,7 +149,7 @@ class HomePageState extends State<HomePage> {
         ],
       );
     }
-    return Text("‘∂≥Ã÷ß≥÷");
+    return Text("RemoteControl");
   }
 }
 
