@@ -27,6 +27,9 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   var _enableStartOnBoot = false;
+  final _hasIgnoreBattery =
+      false; //androidVersion >= 26; // remove because not work on every device
+  var _ignoreBatteryOpt = false;
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
@@ -46,7 +49,26 @@ class HomePageState extends State<HomePage> {
     super.initState();
     initPages();
   }
+  
+  Future<bool> checkAndUpdateIgnoreBatteryStatus() async {
+    final res = await AndroidPermissionManager.check(
+        kRequestIgnoreBatteryOptimizations);
+    if (_ignoreBatteryOpt != res) {
+      _ignoreBatteryOpt = res;
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
   Future<bool> canStartOnBoot() async {
+    // start on boot depends on ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS and SYSTEM_ALERT_WINDOW
+    if (_hasIgnoreBattery && !_ignoreBatteryOpt) {
+      return false;
+    }
+    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+      return false;
+    }
     return true;
   }
   
