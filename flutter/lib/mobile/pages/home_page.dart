@@ -43,6 +43,19 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     initPages();
+  }
+
+  void initPages() async {
+    _pages.clear();
+    if (!true) {
+      //_pages.add(ConnectionPage(
+        //appBarActions: [],
+      //));
+    }
+    if (isAndroid && !bind.isOutgoingOnly()) {
+      _pages.addAll([ServerPage()]);
+    }
+    //_pages.add(SettingsPage());
 	var enableStartOnBoot =
           await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
       if (!enableStartOnBoot) {
@@ -79,19 +92,6 @@ class HomePageState extends State<HomePage> {
         update = true;
         _enableStartOnBoot = enableStartOnBoot;
       }
-  }
-
-  void initPages() {
-    _pages.clear();
-    if (!true) {
-      //_pages.add(ConnectionPage(
-        //appBarActions: [],
-      //));
-    }
-    if (isAndroid && !bind.isOutgoingOnly()) {
-      _pages.addAll([ServerPage()]);
-    }
-    //_pages.add(SettingsPage());
   }
 
   @override
