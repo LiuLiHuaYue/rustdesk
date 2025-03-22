@@ -166,7 +166,6 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                 setState(() => _enableStartOnBoot = true);
                 gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
                 enableStartOnBoot = true;
-      }
 
       if (enableStartOnBoot) {
         if (!await canStartOnBoot()) {
