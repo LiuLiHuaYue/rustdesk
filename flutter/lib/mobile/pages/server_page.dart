@@ -159,7 +159,6 @@ class _DropDownAction extends StatelessWidget {
 
 class _ServerPageState extends State<ServerPage> {
   Timer? _updateTimer;
-  var _enableStartOnBoot = false;
   @override
   void initState() {
     super.initState();
@@ -167,43 +166,6 @@ class _ServerPageState extends State<ServerPage> {
       await gFFI.serverModel.fetchID();
     });
     gFFI.serverModel.checkAndroidPermission();
-	var enableStartOnBoot =
-          await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
-      if (!enableStartOnBoot) {
-                  // 1. request kIgnoreBatteryOptimizations
-                  if (!await AndroidPermissionManager.check(
-                      kRequestIgnoreBatteryOptimizations)) {
-                    if (!await AndroidPermissionManager.request(
-                        kRequestIgnoreBatteryOptimizations)) {
-                      return;
-                    }
-                  }
-
-                  // 2. request kSystemAlertWindow
-                  if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-                    if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
-                      return;
-                    }
-                  }
-
-                  // (Optional) 3. request input permission
-                }
-                setState(() => _enableStartOnBoot = true);
-                gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
-                enableStartOnBoot = true;
-
-      if (enableStartOnBoot) {
-        if (!await canStartOnBoot()) {
-          enableStartOnBoot = false;
-          gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
-        }
-      }
-
-      if (enableStartOnBoot != _enableStartOnBoot) {
-        update = true;
-        _enableStartOnBoot = enableStartOnBoot;
-      }
-	
   }
 
   @override
