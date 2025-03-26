@@ -101,7 +101,7 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
                 child: ActionIcon(
                   message: 'Settings',
                   icon: IconFont.menu,
-                  onTap: DesktopTabPage.onAddSetting,
+                  //onTap: DesktopTabPage.onAddSetting,
                   isClose: false,
                 ),
               ),
