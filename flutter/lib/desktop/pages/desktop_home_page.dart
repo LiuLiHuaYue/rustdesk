@@ -158,11 +158,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       ),
                     ),
                     onTap: () => {
-                      if (DesktopSettingPage.tabKeys.isNotEmpty)
-                        {
-                          DesktopSettingPage.switch2page(
-                              DesktopSettingPage.tabKeys[0])
-                        }
+                      //if (DesktopSettingPage.tabKeys.isNotEmpty)
+                        //{
+                          //DesktopSettingPage.switch2page(
+                              //DesktopSettingPage.tabKeys[0])
+                        //}
                     },
                     onHover: (value) => _editHover.value = value,
                   ),
