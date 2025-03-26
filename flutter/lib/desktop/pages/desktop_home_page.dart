@@ -253,7 +253,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     RxBool hover = false.obs;
     return InkWell(
-      onTap: DesktopTabPage.onAddSetting,
+      //onTap: DesktopTabPage.onAddSetting,
       child: Tooltip(
         message: translate('Settings'),
         child: Obx(
