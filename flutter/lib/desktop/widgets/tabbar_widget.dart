@@ -165,7 +165,7 @@ class DesktopTabController {
         }));
       }
     });
-    if ((isDesktop && (bind.isIncomingOnly() || bind.isOutgoingOnly())) ||
+    if ((isDesktop && (true || bind.isOutgoingOnly())) ||
         callOnSelected) {
       if (state.value.tabs.length > index) {
         final key = state.value.tabs[index].key;
@@ -587,7 +587,7 @@ class _DesktopTabState extends State<DesktopTab>
         Expanded(
             child: GestureDetector(
                 // custom double tap handler
-                onTap: !(bind.isIncomingOnly() && isInHomePage()) &&
+                onTap: !(true && isInHomePage()) &&
                         showMaximize
                     ? () {
                         final current = DateTime.now().millisecondsSinceEpoch;
@@ -776,7 +776,7 @@ class WindowActionPanelState extends State<WindowActionPanel> {
                       icon: stateGlobal.isMaximized.isTrue
                           ? IconFont.restore
                           : IconFont.max,
-                      onTap: bind.isIncomingOnly() && isInHomePage()
+                      onTap: true && isInHomePage()
                           ? null
                           : _toggleMaximize,
                       isClose: false,
