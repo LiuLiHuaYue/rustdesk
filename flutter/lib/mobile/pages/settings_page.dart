@@ -30,7 +30,7 @@ class SettingsPage extends StatefulWidget implements PageShape {
   final icon = Icon(Icons.settings);
 
   @override
-  final appBarActions = bind.isDisableSettings() ? [] : [ScanButton()];
+  final appBarActions = true ? [] : [ScanButton()];
 
   @override
   State<SettingsPage> createState() => _SettingsState();
@@ -243,7 +243,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     Provider.of<FfiModel>(context);
     final outgoingOnly = bind.isOutgoingOnly();
-    final incommingOnly = bind.isIncomingOnly();
+    final incommingOnly = true;
     final customClientSection = CustomSettingsSection(
         child: Column(
       children: [
@@ -627,7 +627,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             },
     ));
 
-    final disabledSettings = bind.isDisableSettings();
+    final disabledSettings = true;
     final hideSecuritySettings =
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) == 'Y';
     final settings = SettingsList(
@@ -768,7 +768,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             title: Text(translate("Share Screen")),
             tiles: shareScreenTiles,
           ),
-        if (!bind.isIncomingOnly()) defaultDisplaySection(),
+        if (!true) defaultDisplaySection(),
         if (isAndroid &&
             !disabledSettings &&
             !outgoingOnly &&

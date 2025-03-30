@@ -36,7 +36,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   Timer? _updateTimer;
 
   double get em => 14.0;
-  double? get height => bind.isIncomingOnly() ? null : em * 3;
+  double? get height => true ? null : em * 3;
 
   void onUsePublicServerGuide() {
     const url = "https://rustdesk.com/pricing";
@@ -63,7 +63,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isIncomingOnly = bind.isIncomingOnly();
+    final isIncomingOnly = true;
     startServiceWidget() => Offstage(
           offstage: !_svcStopped.value,
           child: InkWell(
@@ -92,7 +92,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
                       children: [
                         Flexible(
                           child: Text(
-                            translate('setup_server_tip'),
+                            translate(''),
                             style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontSize: em),
@@ -128,10 +128,10 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
               child: _buildConnStatusMsg(),
             ),
             // stop
-            if (!isIncomingOnly) startServiceWidget(),
+            if (true) startServiceWidget(),
             // ready && public
             // No need to show the guide if is custom client.
-            if (!isIncomingOnly) setupServerWidget(),
+            if (true) setupServerWidget(),
           ],
         );
 
