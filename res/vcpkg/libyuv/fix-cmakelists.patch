@@ -3,14 +3,14 @@ index bc641685..42e72a39 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,19 +1,22 @@
-+CMAKE_MINIMUM_REQUIRED( VERSION 3.5 )
++CMAKE_MINIMUM_REQUIRED( VERSION 3.12 )
 +
  # CMakeLists for libyuv
  # Originally created for "roxlu build system" to compile libyuv on windows
  # Run with -DTEST=ON to build unit tests
  
  PROJECT ( YUV C CXX )	# "C" is required even for C++ projects
--CMAKE_MINIMUM_REQUIRED( VERSION 3.5 )
+-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.12 )
  OPTION( TEST "Built unit tests" OFF )
  
 +SET( CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON )
