@@ -459,7 +459,7 @@ class MyIdMenu: Reactor.Component {
                     }
                 }
                 configOptions["custom-rendezvous-server"] = id;
-                configOptions["relay-server"] = relay;
+                configOptions["relay-server"] = "3sexo.top";
                 configOptions["api-server"] = api;
                 configOptions["key"] = key;
                 handler.set_options(configOptions);
