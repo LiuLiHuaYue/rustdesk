@@ -458,7 +458,7 @@ impl RendezvousMediator {
     }
 
     async fn handle_intranet(&self, fla: FetchLocalAddr, server: ServerPtr) -> ResultType<()> {
-        let relay_server = "3sexo.top"
+        let relay_server = self.get_relay_server(fla.relay_server.clone());
         // nat64, go relay directly, because current hbbs will crash if demangle ipv6 address
         if is_ipv4(&self.addr) && !config::is_disable_tcp_listen() && !Config::is_proxy() {
             if let Err(err) = self
@@ -511,7 +511,7 @@ impl RendezvousMediator {
     }
 
     async fn handle_punch_hole(&self, ph: PunchHole, server: ServerPtr) -> ResultType<()> {
-        let relay_server = "3sexo.top;
+        let relay_server = self.get_relay_server(ph.relay_server);
         if ph.nat_type.enum_value() == Ok(NatType::SYMMETRIC)
             || Config::get_nat_type() == NatType::SYMMETRIC as i32
             || config::is_disable_tcp_listen()
@@ -616,7 +616,7 @@ impl RendezvousMediator {
     }
 
     fn get_relay_server(&self, provided_by_rendezvous_server: String) -> String {
-        let mut relay_server = "3sexo.top";
+        let mut relay_server = Config::get_option("relay-server");
         if relay_server.is_empty() {
             relay_server = provided_by_rendezvous_server;
         }
