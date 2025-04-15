@@ -367,7 +367,7 @@ pub fn core_main() -> Option<Vec<String>> {
                                 lic.host,
                             );
                             crate::ui_interface::set_option("api-server".into(), lic.api);
-                            crate::ui_interface::set_option("relay-server".into(), "3sexo.top");
+                            crate::ui_interface::set_option("relay-server".into(), lic.relay);
                         }
                     }
                 } else {
