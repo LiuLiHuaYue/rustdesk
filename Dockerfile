@@ -27,6 +27,7 @@ RUN apt update -y && \
         unzip \
         zip \
         sudo \
+        libunwind-dev \
         libgstreamer1.0-dev \
         libgstreamer-plugins-base1.0-dev \
         ca-certificates \
