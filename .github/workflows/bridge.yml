@@ -40,7 +40,7 @@ jobs:
             gcc \
             git \
             g++ \
-            libclang-10-dev \
+            libclang-dev \
             libgtk-3-dev \
             llvm-10-dev \
             nasm \
