@@ -988,7 +988,7 @@ jobs:
                libxdo-dev \
                libxfixes-dev \
                clang-10 \
-llvm-10-dev \
+               llvm-10-dev \
                nasm \
                ninja-build \
                openjdk-17-jdk-headless \
@@ -1258,7 +1258,7 @@ llvm-10-dev \
                libxdo-dev \
                libxfixes-dev \
                clang-10 \
-llvm-10-dev \
+               llvm-10-dev \
                nasm \
                ninja-build \
                openjdk-17-jdk-headless \
@@ -1546,7 +1546,7 @@ llvm-10-dev \
                libxdo-dev \
                libxfixes-dev \
                clang-10 \
-llvm-10-dev \
+               llvm-10-dev \
                nasm \
                ninja-build \
                pkg-config \

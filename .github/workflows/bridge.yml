@@ -43,7 +43,7 @@ jobs:
             libclang-dev \
             libgtk-3-dev \
             clang-10 \
-llvm-10-dev \
+            llvm-10-dev \
             nasm \
             ninja-build \
             pkg-config \
