@@ -66,14 +66,14 @@ class DesktopSettingPage extends StatefulWidget {
     SettingsTabKey.general,
     if (!isWeb &&
         !bind.isOutgoingOnly() &&
-        !bind.isDisableSettings() &&
+        !true &&
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) != 'Y')
       SettingsTabKey.safety,
-    if (!bind.isDisableSettings() &&
+    if (!true &&
         bind.mainGetBuildinOption(key: kOptionHideNetworkSetting) != 'Y')
       //SettingsTabKey.network,
     if (!bind.isIncomingOnly()) SettingsTabKey.display,
-    if (!isWeb && !bind.isIncomingOnly() && bind.pluginFeatureIsEnabled())
+    if (!isWeb && !true&& bind.pluginFeatureIsEnabled())
       SettingsTabKey.plugin,
     if (!bind.isDisableAccount()) SettingsTabKey.account,
     if (isWindows) SettingsTabKey.printer,
@@ -651,7 +651,7 @@ class _GeneralState extends State<_General> {
           Row(
             children: [
               Text(
-                  '${translate(bind.isIncomingOnly() ? "Directory" : "Incoming")}:'),
+                  '${translate(true? "Directory" : "Incoming")}:'),
               Expanded(
                 child: GestureDetector(
                     onTap: root_dir_exists

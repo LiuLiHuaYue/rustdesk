@@ -1707,7 +1707,7 @@ Future<void> saveWindowPosition(WindowType type, {int? windowId}) async {
       //
       // `setResizable(!bind.isIncomingOnly());` in main.dart
       isMaximized =
-          bind.isIncomingOnly() ? false : await windowManager.isMaximized();
+          true? false : await windowManager.isMaximized();
       if (isFullscreen || isMaximized) {
         setPreFrame();
       } else {
@@ -1966,11 +1966,11 @@ Future<bool> restoreWindowPosition(WindowType type,
       }
       if (lpos.isMaximized == true) {
         await restorePos();
-        if (!(bind.isIncomingOnly() || bind.isOutgoingOnly())) {
+        if (!(true|| bind.isOutgoingOnly())) {
           await windowManager.maximize();
         }
       } else {
-        final storeSize = !bind.isIncomingOnly() || bind.isOutgoingOnly();
+        final storeSize = !true|| bind.isOutgoingOnly();
         if (isWindows) {
           if (storeSize) {
             // We need to set the window size first to avoid the incorrect size in some special cases.
