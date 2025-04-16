@@ -653,20 +653,20 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             ],
           ),
         SettingsSection(title: Text(translate("Settings")), tiles: [
-          if (!disabledSettings && !_hideNetwork && !_hideServer)
-            SettingsTile(
-                title: Text(translate('ID/Relay Server')),
-                leading: Icon(Icons.cloud),
-                onPressed: (context) {
-                  showServerSettings(gFFI.dialogManager);
-                }),
-          if (!isIOS && !_hideNetwork && !_hideProxy)
-            SettingsTile(
-                title: Text(translate('Socks5/Http(s) Proxy')),
-                leading: Icon(Icons.network_ping),
-                onPressed: (context) {
-                  changeSocks5Proxy();
-                }),
+//           if (!disabledSettings && !_hideNetwork && !_hideServer)
+//             SettingsTile(
+//                 title: Text(translate('ID/Relay Server')),
+//                 leading: Icon(Icons.cloud),
+//                 onPressed: (context) {
+//                   showServerSettings(gFFI.dialogManager);
+//                 }),
+//           if (!isIOS && !_hideNetwork && !_hideProxy)
+//             SettingsTile(
+//                 title: Text(translate('Socks5/Http(s) Proxy')),
+//                 leading: Icon(Icons.network_ping),
+//                 onPressed: (context) {
+//                   changeSocks5Proxy();
+//                 }),
           SettingsTile(
               title: Text(translate('Language')),
               leading: Icon(Icons.translate),
@@ -777,46 +777,46 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             title: Text(translate("Enhancements")),
             tiles: enhancementsTiles,
           ),
-        SettingsSection(
-          title: Text(translate("About")),
-          tiles: [
-            SettingsTile(
-                onPressed: (context) async {
-                  await launchUrl(Uri.parse(url));
-                },
-                title: Text(translate("Version: ") + version),
-                value: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text('rustdesk.com',
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                      )),
-                ),
-                leading: Icon(Icons.info)),
-            SettingsTile(
-                title: Text(translate("Build Date")),
-                value: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text(_buildDate),
-                ),
-                leading: Icon(Icons.query_builder)),
-            if (isAndroid)
-              SettingsTile(
-                  onPressed: (context) => onCopyFingerprint(_fingerprint),
-                  title: Text(translate("Fingerprint")),
-                  value: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text(_fingerprint),
-                  ),
-                  leading: Icon(Icons.fingerprint)),
-            SettingsTile(
-              title: Text(translate("Privacy Statement")),
-              onPressed: (context) =>
-                  launchUrlString('https://rustdesk.com/privacy.html'),
-              leading: Icon(Icons.privacy_tip),
-            )
-          ],
-        ),
+//         SettingsSection(
+//           title: Text(translate("About")),
+//           tiles: [
+//             SettingsTile(
+//                 onPressed: (context) async {
+//                   await launchUrl(Uri.parse(url));
+//                 },
+//                 title: Text(translate("Version: ") + version),
+//                 value: Padding(
+//                   padding: EdgeInsets.symmetric(vertical: 8),
+//                   child: Text('rustdesk.com',
+//                       style: TextStyle(
+//                         decoration: TextDecoration.underline,
+//                       )),
+//                 ),
+//                 leading: Icon(Icons.info)),
+//             SettingsTile(
+//                 title: Text(translate("Build Date")),
+//                 value: Padding(
+//                   padding: EdgeInsets.symmetric(vertical: 8),
+//                   child: Text(_buildDate),
+//                 ),
+//                 leading: Icon(Icons.query_builder)),
+//             if (isAndroid)
+//               SettingsTile(
+//                   onPressed: (context) => onCopyFingerprint(_fingerprint),
+//                   title: Text(translate("Fingerprint")),
+//                   value: Padding(
+//                     padding: EdgeInsets.symmetric(vertical: 8),
+//                     child: Text(_fingerprint),
+//                   ),
+//                   leading: Icon(Icons.fingerprint)),
+//             SettingsTile(
+//               title: Text(translate("Privacy Statement")),
+//               onPressed: (context) =>
+//                   launchUrlString('https://rustdesk.com/privacy.html'),
+//               leading: Icon(Icons.privacy_tip),
+//             )
+//           ],
+//         ),
       ],
     );
     return settings;
