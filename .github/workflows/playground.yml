@@ -280,7 +280,7 @@ jobs:
                libxcb-xfixes0-dev \
                libxdo-dev \
                libxfixes-dev \
-               clang-10 \
+               clang \
                nasm \
                yasm \
                ninja-build \

@@ -987,7 +987,7 @@ jobs:
                libxcb-xfixes0-dev \
                libxdo-dev \
                libxfixes-dev \
-               clang-10 \
+               clang \
                nasm \
                ninja-build \
                openjdk-17-jdk-headless \
@@ -1256,7 +1256,7 @@ jobs:
                libxcb-xfixes0-dev \
                libxdo-dev \
                libxfixes-dev \
-               clang-10 \
+               clang \
                nasm \
                ninja-build \
                openjdk-17-jdk-headless \
@@ -1543,7 +1543,7 @@ jobs:
                libxcb-xfixes0-dev \
                libxdo-dev \
                libxfixes-dev \
-               clang-10 \
+               clang \
                nasm \
                ninja-build \
                pkg-config \
