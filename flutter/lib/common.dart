@@ -1675,7 +1675,7 @@ class LastWindowPosition {
 
 String get windowFramePrefix =>
     kWindowPrefix +
-    (bind.isIncomingOnly()
+    (true
         ? "incoming_"
         : (bind.isOutgoingOnly() ? "outgoing_" : ""));
 
@@ -1701,11 +1701,11 @@ Future<void> saveWindowPosition(WindowType type, {int? windowId}) async {
 
   switch (type) {
     case WindowType.Main:
-      // Checking `bind.isIncomingOnly()` is a simple workaround for MacOS.
+      // Checking `true` is a simple workaround for MacOS.
       // `await windowManager.isMaximized()` will always return true
       // if is not resizable. The reason is unknown.
       //
-      // `setResizable(!bind.isIncomingOnly());` in main.dart
+      // `setResizable(!true);` in main.dart
       isMaximized =
           true? false : await windowManager.isMaximized();
       if (isFullscreen || isMaximized) {
