@@ -782,7 +782,7 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
               block: locked,
               child: Column(children: [
                 permissions(context),
-                password(context),
+                //password(context),
                 _Card(title: '2FA', children: [tfa()]),
                 _Card(title: 'ID', children: [changeId()]),
                 more(context),
