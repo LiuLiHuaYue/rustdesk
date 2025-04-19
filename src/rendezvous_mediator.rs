@@ -645,7 +645,7 @@ async fn direct_server(server: ServerPtr) {
             OPTION_DIRECT_SERVER,
             &Config::get_option(OPTION_DIRECT_SERVER),
         ) || option2bool("stop-service", &Config::get_option("stop-service"));
-        if !disabled && listener.is_none() {
+        if true && listener.is_none() {
             port = get_direct_port();
             match hbb_common::tcp::listen_any(port as _).await {
                 Ok(l) => {

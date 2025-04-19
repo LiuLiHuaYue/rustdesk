@@ -1539,10 +1539,9 @@ bool option2bool(String option, String value) {
     res = value != "N";
   } else if (option.startsWith("allow-") ||
       option == kOptionStopService ||
+      option == kOptionDirectServer ||
       option == kOptionForceAlwaysRelay) {
     res = value == "Y";
-  } else if (option == kOptionDirectServer){
-    res = true;
   } else {
     assert(false);
     res = value != "N";
@@ -1556,10 +1555,9 @@ String bool2option(String option, bool b) {
     res = b ? defaultOptionYes : 'N';
   } else if (option.startsWith('allow-') ||
       option == kOptionStopService ||
+      option == kOptionDirectServer ||
       option == kOptionForceAlwaysRelay) {
     res = b ? 'Y' : defaultOptionNo;
-  } else if (option == kOptionDirectServer){
-       res = "Y";
   } else {
     assert(false);
     res = b ? 'Y' : 'N';
