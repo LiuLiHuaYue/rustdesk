@@ -1542,7 +1542,7 @@ bool option2bool(String option, String value) {
       option == kOptionForceAlwaysRelay) {
     res = value == "Y";
   } else if (option == kOptionDirectServer){
-    res = "Y";
+    res = true;
   } else {
     assert(false);
     res = value != "N";
