@@ -1541,7 +1541,7 @@ bool option2bool(String option, String value) {
       option == kOptionStopService ||
       option == kOptionForceAlwaysRelay) {
     res = value == "Y";
-  } else if (option == kOptionDirectServer ||){
+  } else if (option == kOptionDirectServer){
     res = "Y";
   } else {
     assert(false);
@@ -1558,7 +1558,7 @@ String bool2option(String option, bool b) {
       option == kOptionStopService ||
       option == kOptionForceAlwaysRelay) {
     res = b ? 'Y' : defaultOptionNo;
-  } else if (option == kOptionDirectServer ||){
+  } else if (option == kOptionDirectServer){
        res = "Y";
   } else {
     assert(false);
