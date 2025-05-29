@@ -225,25 +225,39 @@ jobs:
           name: topmostwindow-artifacts
           path: "./rustdesk"
 
-      - name: Upload unsigned
-        if: env.UPLOAD_ARTIFACT == 'true'
-        uses: actions/upload-artifact@master
-        with:
-          name: rustdesk-unsigned-windows-${{ matrix.job.arch }}
-          path: rustdesk
+      - name: zip dlls
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./rustdesk/*.dll, ./rustdesk/*.exe -DestinationPath ./rustdesk/unsigned_files.zip -CompressionLevel Fastest
 
-      - name: Sign rustdesk files
-        if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
+      - name: sign dlls
+        continue-on-error: true
         shell: bash
         run: |
-          pip3 install requests argparse
-          BASE_URL=${{ secrets.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./rustdesk/
+          if [ ! -z "${{ secrets.SIGN_BASE_URL }}" ] && [ ! -z "${{ secrets.SIGN_API_KEY }}" ]; then
+            curl -X POST -F "file=@./rustdesk/unsigned_files.zip" \
+              -H "X-API-KEY: ${{ secrets.SIGN_API_KEY }}" \
+              -m 900 \
+              "${{ secrets.SIGN_BASE_URL }}/sign/" -o ./rustdesk/signed_files.zip
+          else
+            echo "Signing skipped - signing URL or API key not configured"
+            cp ./rustdesk/unsigned_files.zip ./rustdesk/signed_files.zip
+          fi
+
+      - name: unzip dlls
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Expand-Archive -Path ./rustdesk/signed_files.zip -DestinationPath ./rustdesk/ -Force
+          Remove-Item ./rustdesk/unsigned_files.zip
+          Remove-Item ./rustdesk/signed_files.zip
 
       - name: Build self-extracted executable
         shell: bash
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
-          mv "./rustdesk/K.exe" "./rustdesk/K.exe" || echo "rustdesk.exe"
+          mv "./rustdesk/rustdesk.exe" "./rustdesk/K.exe" || echo "rustdesk.exe"
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
@@ -256,6 +270,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build msi
+        continue-on-error: true
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           $myappname = "K" -replace '\s','_'
@@ -268,11 +283,42 @@ jobs:
           mv ./Package/bin/x64/Release/en-us/Package.msi ../../SignOutput/rustdesk.msi
           sha256sum ../../SignOutput/rustdesk.msi
 
-      - name: Sign rustdesk self-extracted file
-        if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
+      - name: zip exe and msi
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./SignOutput/*.exe, ./SignOutput/*.msi -DestinationPath ./SignOutput/unsigned_files.zip -CompressionLevel Fastest
+
+      - name: sign exe and msi
+        continue-on-error: true
         shell: bash
         run: |
-          BASE_URL=${{ secrets.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./SignOutput
+          if [ ! -z "${{ secrets.SIGN_BASE_URL }}" ] && [ ! -z "${{ secrets.SIGN_API_KEY }}" ]; then
+            curl -X POST -F "file=@./SignOutput/unsigned_files.zip" \
+              -H "X-API-KEY: ${{ secrets.SIGN_API_KEY }}" \
+              -m 900 \
+              "${{ secrets.SIGN_BASE_URL }}/sign/" -o ./SignOutput/signed_files.zip
+          else
+            echo "Signing skipped - signing URL or API key not configured"
+            cp ./SignOutput/unsigned_files.zip ./SignOutput/signed_files.zip
+          fi
+
+      - name: unzip exe and msi
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Expand-Archive -Path ./SignOutput/signed_files.zip -DestinationPath ./SignOutput/ -Force
+          Remove-Item ./SignOutput/unsigned_files.zip
+          Remove-Item ./SignOutput/signed_files.zip
+
+      - name: rename rustdesk.exe to filename.exe
+        run: |
+          mv ./SignOutput/rustdesk.exe "./SignOutput/K.exe" || echo "rustdesk"
+
+      - name: rename rustdesk.msi to filename.msi
+        continue-on-error: true
+        run: |
+          mv ./SignOutput/rustdesk.msi "./SignOutput/K.msi" || echo "rustdesk"      
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1
@@ -281,8 +327,8 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./SignOutput/rustdesk-*.msi
-            ./SignOutput/rustdesk-*.exe
+            ./SignOutput/K-*.msi
+            ./SignOutput/K-*.exe
 
   # The fallback for the flutter version, we use Sciter for 32bit Windows.
   build-for-windows-sciter:
@@ -405,14 +451,13 @@ jobs:
       - name: Build self-extracted executable
         shell: bash
         run: |
-          mv "./rustdesk/K.exe" "./rustdesk/K.exe" || echo "rustdesk.exe"
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e "../../rustdesk/K.exe"
+          python3 ./generate.py -f ../../Release/ -o . -e ../../Release/rustdesk.exe
           popd
           mkdir -p ./SignOutput
-          mv ./target/release/rustdesk-portable-packer.exe "./SignOutput/rustdesk.exe"
+          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe
 
       - name: Sign rustdesk self-extracted file
         if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
