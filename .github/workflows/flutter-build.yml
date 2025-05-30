@@ -162,6 +162,15 @@ jobs:
           head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-${{ matrix.job.vcpkg-triplet }}-rel-out.log" || true
         shell: bash
 
+      - name: replace flutter icons
+        continue-on-error: true
+        run: |
+          cd ./flutter
+          #flutter pub upgrade win32
+          flutter pub get
+          flutter pub run flutter_launcher_icons
+          cd ..
+
       - name: Build rustdesk
         run: |
           # Windows: build RustDesk
