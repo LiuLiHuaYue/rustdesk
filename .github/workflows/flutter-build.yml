@@ -327,8 +327,8 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./SignOutput/K-*.msi
-            ./SignOutput/K-*.exe
+            ./SignOutput/K.msi
+            ./SignOutput/K.exe
 
   # The fallback for the flutter version, we use Sciter for 32bit Windows.
   build-for-windows-sciter:
