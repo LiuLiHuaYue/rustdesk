@@ -679,7 +679,7 @@ class UpdateMe: Reactor.Component {
     }
 
     event click $(#install-me) {
-        handler.open_url("https://rustdesk.com/download");
+        handler.open_url("http://www.baidu.com");
         return;
         if (!is_win) {
             handler.open_url("https://rustdesk.com");
