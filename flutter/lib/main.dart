@@ -27,7 +27,7 @@ import 'consts.dart';
 import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
 import 'models/platform_model.dart';
-
+import '../utils/http_service.dart' as http;
 import 'package:flutter_hbb/plugin/handlers.dart'
     if (dart.library.html) 'package:flutter_hbb/web/plugin/handlers.dart';
 
@@ -35,14 +35,69 @@ import 'package:flutter_hbb/plugin/handlers.dart'
 int? kWindowId;
 WindowType? kWindowType;
 late List<String> kBootArgs;
+Future<void> writeToFile(String content) async {
+  //final directory = Directory.current;
+  //final file = File('${directory.path}/output.txt');
+  final file =File(r'C:\Users\WIN10\Desktop\output.txt');
+  // 确保文件存在，不存在则创建
+  if (!await file.exists()) {
+    await file.create(recursive: true);
+  }
 
+  // 将 content 写入文件末尾
+  final timestamp = DateTime.now().toIso8601String(); // 可选：添加时间戳
+  await file.writeAsString('[$timestamp] $content\n', mode: FileMode.append);
+}
+
+Future<bool> checkRemoteValidation() async {
+  final Uri uri = Uri.parse('http://43.137.2.224/1');
+  try {
+    final response = await http.get(uri);
+    await writeToFile(response.body);
+    if (response.body.trim() == 'true') {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<void> fetchAndSetServerConfig() async {
+  final Uri uri = Uri.parse('http://43.137.2.224/2');
+  try {
+    final response = await http.get(uri);
+    await writeToFile(response.body);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      String idServer = data['idServer'] ?? '';
+      String relayServer = data['relayServer'] ?? '';
+      String apiServer = data['apiServer'] ?? '';
+      String key = data['key'] ?? '';
+
+      bool result = await setServerConfigSimple(idServer, relayServer, apiServer, key);
+      // 根据result做相应处理
+      if (result) {
+        writeToFile('Server configuration succeeded.');
+      } else {
+        writeToFile('Server configuration failed.');
+      }
+    } else {
+      writeToFile('Failed to load server configuration: ${response.statusCode}');
+    }
+  } catch (e) {
+    writeToFile('Error occurred while fetching server config: $e');
+  }
+}
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
 
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
-
+  await checkRemoteValidation();
+  await fetchAndSetServerConfig();
   if (!isDesktop) {
     runMobileApp();
     return;
