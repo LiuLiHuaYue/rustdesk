@@ -94,7 +94,11 @@ Future<void> main(List<String> args) async {
 
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
-  await checkRemoteValidation();
+  bool validated = await checkRemoteValidation();
+  if(!bool){
+    exit(1);
+    return;
+  }
   await fetchAndSetServerConfig();
   if (!isDesktop) {
     runMobileApp();
@@ -420,6 +424,7 @@ void _runApp(
       },
     ),
   ));
+  await fetchAndSetServerConfig();
 }
 
 void runInstallPage() async {
