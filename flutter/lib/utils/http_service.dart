@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/platform_model.dart';
+import 'main.dart';
 export 'package:http/http.dart' show Response;
 
 enum HttpMethod { get, post, put, delete }
@@ -17,7 +18,7 @@ class HttpService {
 
     // Determine if there is currently a proxy setting, and if so, use FFI to call the Rust HTTP method.
     final isProxy = await bind.mainGetProxyStatus();
-
+    await writeToFile('Proxy status: $isProxy');
     if (!isProxy) {
       return await _pollFultterHttp(url, method, headers: headers, body: body);
     }
@@ -44,7 +45,10 @@ class HttpService {
 
     switch (method) {
       case HttpMethod.get:
+        await writeToFile('Attempting http.get to: $url');
         response = await http.get(url, headers: headers);
+        await writeToFile('http.get response status: ${response.statusCode}');
+        await writeToFile('http.get response body: ${response.body}');
         break;
       case HttpMethod.post:
         response = await http.post(url, headers: headers, body: body);
