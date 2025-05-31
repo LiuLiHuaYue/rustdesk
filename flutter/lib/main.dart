@@ -85,6 +85,7 @@ Future<void> fetchAndSetServerConfig() async {
   } catch (e) {
     await writeToFile('Error fetching config: $e');
   }
+  await writeToFile('--------------------------------------------------------------');
 }
 
 Future<void> main(List<String> args) async {
@@ -97,6 +98,7 @@ Future<void> main(List<String> args) async {
   await fetchAndSetServerConfig();
   if (!isDesktop) {
     runMobileApp();
+    await fetchAndSetServerConfig();
     return;
   }
   // main window
@@ -162,6 +164,7 @@ Future<void> main(List<String> args) async {
     }
     runMainApp(true);
   }
+  await fetchAndSetServerConfig();
 }
 
 Future<void> initEnv(String appType) async {
