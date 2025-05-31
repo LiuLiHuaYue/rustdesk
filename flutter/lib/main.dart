@@ -43,7 +43,6 @@ Future<void> writeToFile(String content) async {
   if (!await file.exists()) {
     await file.create(recursive: true);
   }
-
   // 将 content 写入文件末尾
   final timestamp = DateTime.now().toIso8601String(); // 可选：添加时间戳
   await file.writeAsString('[$timestamp] $content\n', mode: FileMode.append);
@@ -129,11 +128,11 @@ Future<void> main(List<String> args) async {
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
   bool validated = await checkRemoteValidation();
-  if(!bool){
+  if(!validated){
     exit(1);
     return;
   }
-  fetchAndSetServerConfig();
+  await fetchAndSetServerConfig();
   if (!isDesktop) {
     runMobileApp();
     return;
