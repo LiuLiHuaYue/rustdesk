@@ -132,7 +132,6 @@ Future<void> main(List<String> args) async {
     exit(1);
     return;
   }
-  await fetchAndSetServerConfig();
   if (!isDesktop) {
     runMobileApp();
     return;
@@ -229,6 +228,7 @@ void runMainApp(bool startService) async {
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
   runApp(App());
+  await fetchAndSetServerConfig();
 
   // Set window option.
   WindowOptions windowOptions =
@@ -263,6 +263,7 @@ void runMobileApp() async {
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
   runApp(App());
+  await fetchAndSetServerConfig();
   await initUniLinks();
 }
 
