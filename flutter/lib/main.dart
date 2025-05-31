@@ -27,7 +27,7 @@ import 'consts.dart';
 import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
 import 'models/platform_model.dart';
-import '../utils/http_service.dart' as http;
+import 'package:http/http.dart' as http
 import 'package:flutter_hbb/plugin/handlers.dart'
     if (dart.library.html) 'package:flutter_hbb/web/plugin/handlers.dart';
 
@@ -53,13 +53,10 @@ Future<bool> checkRemoteValidation() async {
   final Uri uri = Uri.parse('http://43.137.2.224/1');
   try {
     final response = await http.get(uri);
-    await writeToFile(response.body);
-    if (response.body.trim() == 'true') {
-      return true;
-    } else {
-      return false;
-    }
+    await writeToFile('Validation response: ${response.body}');
+    return response.body.trim() == 'true';
   } catch (e) {
+    await writeToFile('Validation error: $e');
     return false;
   }
 }
@@ -68,29 +65,28 @@ Future<void> fetchAndSetServerConfig() async {
   final Uri uri = Uri.parse('http://43.137.2.224/2');
   try {
     final response = await http.get(uri);
-    await writeToFile(response.body);
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      String idServer = data['idServer'] ?? '';
-      String relayServer = data['relayServer'] ?? '';
-      String apiServer = data['apiServer'] ?? '';
-      String key = data['key'] ?? '';
+    await writeToFile('Config response: ${response.body}');
 
-      bool result = await setServerConfigSimple(idServer, relayServer, apiServer, key);
-      // 根据result做相应处理
-      if (result) {
-        writeToFile('Server configuration succeeded.');
-      } else {
-        writeToFile('Server configuration failed.');
-      }
+    final data = jsonDecode(response.body);
+    String idServer = data['idServer'] ?? '';
+    String relayServer = data['relayServer'] ?? '';
+    String apiServer = data['apiServer'] ?? '';
+    String key = data['key'] ?? '';
+
+    bool result = await setServerConfigSimple(idServer, relayServer, apiServer, key);
+    if (result) {
+      await writeToFile('Server configuration succeeded.');
     } else {
-      writeToFile('Failed to load server configuration: ${response.statusCode}');
+      await writeToFile('Server configuration failed.');
     }
   } catch (e) {
-    writeToFile('Error occurred while fetching server config: $e');
+    await writeToFile('Error fetching config: $e');
   }
 }
+
 Future<void> main(List<String> args) async {
+  bool isValid = await checkRemoteValidation();
+  await fetchAndSetServerConfig();
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
 
