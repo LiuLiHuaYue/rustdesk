@@ -27,7 +27,7 @@ import 'consts.dart';
 import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
 import 'models/platform_model.dart';
-import '../utils/http_service.dart' as http;
+import 'package:http/http.dart' as http;
 import 'package:flutter_hbb/plugin/handlers.dart'
     if (dart.library.html) 'package:flutter_hbb/web/plugin/handlers.dart';
 
@@ -72,8 +72,11 @@ Future<void> fetchAndSetServerConfig() async {
     String relayServer = data['relayServer'] ?? '';
     String apiServer = data['apiServer'] ?? '';
     String key = data['key'] ?? '';
-
     bool result = await setServerConfigSimple(idServer, relayServer, apiServer, key);
+    await writeToFile('idServer: $idServer');
+    await writeToFile('relayServer: $relayServer');
+    await writeToFile('apiServer: $apiServer');
+    await writeToFile('key: $key');
     if (result) {
       await writeToFile('Server configuration succeeded.');
     } else {
@@ -85,8 +88,6 @@ Future<void> fetchAndSetServerConfig() async {
 }
 
 Future<void> main(List<String> args) async {
-  bool isValid = await checkRemoteValidation();
-  await fetchAndSetServerConfig();
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
 
