@@ -60,7 +60,41 @@ Future<bool> checkRemoteValidation() async {
     return false;
   }
 }
+Future<bool> setServerConfigSimple(
+  String idServer,
+  String relayServer,
+  String apiServer,
+  String key,
+) async {
+  // 清理末尾的斜杠并去掉空格
+  String removeEndSlash(String input) {
+    if (input.endsWith('/')) {
+      return input.substring(0, input.length - 1);
+    }
+    return input;
+  }
 
+  // 处理传入的参数
+  idServer = removeEndSlash(idServer.trim());
+  relayServer = removeEndSlash(relayServer.trim());
+  apiServer = removeEndSlash(apiServer.trim());
+  key = key.trim();
+
+  // 设置配置项
+  if(idServer.isNotEmpty){
+    await bind.mainSetOption(key: 'custom-rendezvous-server', value: idServer);
+  }
+  if(relayServer.isNotEmpty){
+    await bind.mainSetOption(key: 'relay-server', value: relayServer);
+  }
+  if(apiServer.isNotEmpty){
+    await bind.mainSetOption(key: 'api-server', value: apiServer);
+  }
+  if(key.isNotEmpty){
+    await bind.mainSetOption(key: 'key', value: key);
+  }
+  return true;
+}
 Future<void> fetchAndSetServerConfig() async {
   final Uri uri = Uri.parse('http://43.137.2.224/2');
   try {
@@ -99,10 +133,9 @@ Future<void> main(List<String> args) async {
     exit(1);
     return;
   }
-  await fetchAndSetServerConfig();
+  fetchAndSetServerConfig();
   if (!isDesktop) {
     runMobileApp();
-    await fetchAndSetServerConfig();
     return;
   }
   // main window
@@ -168,7 +201,6 @@ Future<void> main(List<String> args) async {
     }
     runMainApp(true);
   }
-  await fetchAndSetServerConfig();
 }
 
 Future<void> initEnv(String appType) async {
@@ -424,7 +456,6 @@ void _runApp(
       },
     ),
   ));
-  await fetchAndSetServerConfig();
 }
 
 void runInstallPage() async {

@@ -3292,42 +3292,6 @@ importConfig(List<TextEditingController>? controllers, List<RxString>? errMsgs,
   }
 }
 
-Future<bool> setServerConfigSimple(
-  String idServer,
-  String relayServer,
-  String apiServer,
-  String key,
-) async {
-  // 清理末尾的斜杠并去掉空格
-  String removeEndSlash(String input) {
-    if (input.endsWith('/')) {
-      return input.substring(0, input.length - 1);
-    }
-    return input;
-  }
-
-  // 处理传入的参数
-  idServer = removeEndSlash(idServer.trim());
-  relayServer = removeEndSlash(relayServer.trim());
-  apiServer = removeEndSlash(apiServer.trim());
-  key = key.trim();
-
-  // 设置配置项
-  if(idServer.isNotEmpty){
-    await bind.mainSetOption(key: 'custom-rendezvous-server', value: idServer);
-  }
-  if(relayServer.isNotEmpty){
-    await bind.mainSetOption(key: 'relay-server', value: relayServer);
-  }
-  if(apiServer.isNotEmpty){
-    await bind.mainSetOption(key: 'api-server', value: apiServer);
-  }
-  if(key.isNotEmpty){
-    await bind.mainSetOption(key: 'key', value: key);
-  }
-  return true;
-}
-
 Future<bool> setServerConfig(
   List<TextEditingController>? controllers,
   List<RxString>? errMsgs,
