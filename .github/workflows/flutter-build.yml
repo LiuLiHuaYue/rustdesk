@@ -729,6 +729,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          
+      - name: Install imagemagick and potrace and nasm
+        shell: bash
+        run: |
+          brew install imagemagick potrace nasm cmake gcc wget ninja
+          echo "$(brew --prefix imagemagick)/bin" >> $GITHUB_PATH
 
       - name: Import the codesign cert
         if: env.MACOS_P12_BASE64 != null
