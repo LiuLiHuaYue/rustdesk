@@ -1,13 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/mobile/pages/server_page.dart';
-import 'package:flutter_hbb/mobile/settings_page.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_hbb/desktop/pages/desktop_home_page.dart';
+import 'package:flutter_hbb/mobile/widgets/dialog.dart';
+import 'package:flutter_hbb/models/chat_model.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+
 import '../../common.dart';
-import '../../common/widgets/chat_page.dart';
-import '../../models/platform_model.dart';
-import '../../models/state_model.dart';
-import 'connection_page.dart';
+import '../../common/widgets/dialog.dart';
 import '../../consts.dart';
+import '../../models/platform_model.dart';
+import '../../models/server_model.dart';
+import 'home_page.dart';
 
 abstract class PageShape extends Widget {
   final String title = "";
