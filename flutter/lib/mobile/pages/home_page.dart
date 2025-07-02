@@ -1,19 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_hbb/desktop/pages/desktop_home_page.dart';
-import 'package:flutter_hbb/mobile/widgets/dialog.dart';
-import 'package:flutter_hbb/models/chat_model.dart';
+import 'package:flutter_hbb/mobile/pages/server_page.dart';
+import 'package:flutter_hbb/mobile/pages/settings_page.dart';
+import 'package:flutter_hbb/web/settings_page.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
-
 import '../../common.dart';
-import '../../common/widgets/dialog.dart';
-import '../../consts.dart';
+import '../../common/widgets/chat_page.dart';
 import '../../models/platform_model.dart';
-import '../../models/server_model.dart';
-import 'home_page.dart';
+import '../../models/state_model.dart';
+import 'connection_page.dart';
 
 abstract class PageShape extends Widget {
   final String title = "";
@@ -23,22 +17,21 @@ abstract class PageShape extends Widget {
 
 class HomePage extends StatefulWidget {
   static final homeKey = GlobalKey<HomePageState>();
+
   HomePage() : super(key: homeKey);
+
   @override
   HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  final _hasIgnoreBattery = false;
-  var _ignoreBatteryOpt = false;
-  var _enableStartOnBoot = false;
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
+  bool get isChatPageCurrentTab => isAndroid ? _selectedIndex == _chatPageTabIndex : false;
 
-  bool get isChatPageCurrentTab =>
-      isAndroid ? _selectedIndex == _chatPageTabIndex : false;
+  var _enableStartOnBoot = false;
 
   @override
   void initState() {
@@ -50,6 +43,7 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  // 直接集成开机自启功能
   Future<void> _initStartOnBootIfNeeded() async {
     var enableStartOnBoot =
         await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt) ?? false;
@@ -99,19 +93,18 @@ class HomePageState extends State<HomePage> {
     return false;
   }
 
-  Future<void> initPages() async {
+  // 初始化页面
+  void initPages() {
     _pages.clear();
-    if (isAndroid && !bind.isOutgoingOnly()) {
-      _pages.addAll([ServerPage()]);
+    if (!bind.isIncomingOnly()) {
+      _pages.add(ConnectionPage(appBarActions: []));
     }
-    // 若不想加载设置页可移除此行
-    _pages.add(SettingsPage());
-  }
-
-  void refreshPages() {
-    setState(() {
-      initPages();
-    });
+    if (isAndroid && !bind.isOutgoingOnly()) {
+      _chatPageTabIndex = _pages.length;
+      _pages.addAll([ChatPage(type: ChatPageType.mobileMain), ServerPage()]);
+    }
+    // 现在不加载 SettingsPage，而是将开机自启功能放在这里进行控制
+    // _pages.add(SettingsPage()); // 移除对SettingsPage的加载
   }
 
   @override
@@ -122,42 +115,38 @@ class HomePageState extends State<HomePage> {
             setState(() {
               _selectedIndex = 0;
             });
-            return false;
+          } else {
+            return true;
           }
-          return true;
+          return false;
         },
         child: Scaffold(
           appBar: AppBar(
             centerTitle: true,
             title: appTitle(),
-            actions: _pages.isNotEmpty
-                ? _pages.elementAt(_selectedIndex).appBarActions
-                : [],
+            actions: _pages.elementAt(_selectedIndex).appBarActions,
           ),
-          bottomNavigationBar: _pages.isEmpty
-              ? null
-              : BottomNavigationBar(
-                  key: navigationBarKey,
-                  items: _pages
-                      .map((page) => BottomNavigationBarItem(
-                          icon: page.icon, label: page.title))
-                      .toList(),
-                  currentIndex: _selectedIndex,
-                  type: BottomNavigationBarType.fixed,
-                  selectedItemColor: MyTheme.accent,
-                  unselectedItemColor: MyTheme.darkGray,
-                  onTap: (index) => setState(() {
-                    if (_selectedIndex != index) {
-                      _selectedIndex = index;
-                      if (isChatPageCurrentTab) {
-                        gFFI.chatModel.hideChatIconOverlay();
-                        gFFI.chatModel.hideChatWindowOverlay();
-                        gFFI.chatModel.mobileClearClientUnread(
-                            gFFI.chatModel.currentKey.connId);
-                      }
-                    }
-                  }),
-                ),
+          bottomNavigationBar: BottomNavigationBar(
+            key: navigationBarKey,
+            items: _pages
+                .map((page) =>
+                BottomNavigationBarItem(icon: page.icon, label: page.title))
+                .toList(),
+            currentIndex: _selectedIndex,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: MyTheme.accent,
+            unselectedItemColor: MyTheme.darkGray,
+            onTap: (index) => setState(() {
+              if (_selectedIndex != index) {
+                _selectedIndex = index;
+                if (isChatPageCurrentTab) {
+                  gFFI.chatModel.hideChatIconOverlay();
+                  gFFI.chatModel.hideChatWindowOverlay();
+                  gFFI.chatModel.mobileClearClientUnread(gFFI.chatModel.currentKey.connId);
+                }
+              }
+            }),
+          ),
           body: _pages.isEmpty
               ? Center(child: CircularProgressIndicator())
               : _pages.elementAt(_selectedIndex),
@@ -171,7 +160,7 @@ class HomePageState extends State<HomePage> {
         currentUser != null &&
         currentKey.peerId.isNotEmpty) {
       final connected =
-          gFFI.serverModel.clients.any((e) => e.id == currentKey.connId);
+      gFFI.serverModel.clients.any((e) => e.id == currentKey.connId);
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -206,7 +195,7 @@ class HomePageState extends State<HomePage> {
         ],
       );
     }
-    return Text('Maotai');
+    return Text("Maotai");
   }
 }
 
@@ -219,6 +208,7 @@ class WebHomePage extends StatelessWidget {
     stateGlobal.isInMainPage = true;
     handleUnilink(context);
     return Scaffold(
+      // backgroundColor: MyTheme.grayBg,
       appBar: AppBar(
         centerTitle: true,
         title: Text("${bind.mainGetAppNameSync()} (Preview)"),
@@ -228,8 +218,10 @@ class WebHomePage extends StatelessWidget {
     );
   }
 
-  void handleUnilink(BuildContext context) {
-    if (webInitialLink.isEmpty) return;
+  handleUnilink(BuildContext context) {
+    if (webInitialLink.isEmpty) {
+      return;
+    }
     final link = webInitialLink;
     webInitialLink = '';
     final splitter = ["/#/", "/#", "#/", "#"];
@@ -237,24 +229,30 @@ class WebHomePage extends StatelessWidget {
     for (var s in splitter) {
       if (link.contains(s)) {
         var list = link.split(s);
-        if (list.length < 2 || list[1].isEmpty) return;
+        if (list.length < 2 || list[1].isEmpty) {
+          return;
+        }
         list.removeAt(0);
         fakelink = "rustdesk://${list.join(s)}";
         break;
       }
     }
-    if (fakelink.isEmpty) return;
+    if (fakelink.isEmpty) {
+      return;
+    }
     final uri = Uri.tryParse(fakelink);
-    if (uri == null) return;
+    if (uri == null) {
+      return;
+    }
     final args = urlLinkToCmdArgs(uri);
-    if (args == null || args.isEmpty) return;
-
+    if (args == null || args.isEmpty) {
+      return;
+    }
     bool isFileTransfer = false;
     bool isViewCamera = false;
     bool isTerminal = false;
     String? id;
     String? password;
-
     for (int i = 0; i < args.length; i++) {
       switch (args[i]) {
         case '--connect':
@@ -281,18 +279,16 @@ class WebHomePage extends StatelessWidget {
           password = args[i + 1];
           i++;
           break;
+        default:
+          break;
       }
     }
-
     if (id != null) {
-      connect(
-        context,
-        id,
-        isFileTransfer: isFileTransfer,
-        isViewCamera: isViewCamera,
+      connect(context, id, 
+        isFileTransfer: isFileTransfer, 
+        isViewCamera: isViewCamera, 
         isTerminal: isTerminal,
-        password: password,
-      );
+        password: password);
     }
   }
 }
