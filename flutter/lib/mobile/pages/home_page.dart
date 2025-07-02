@@ -84,7 +84,7 @@ class HomePageState extends State<HomePage> {
       //_chatPageTabIndex = _pages.length;
       _pages.addAll([ServerPage()]);
     }
-    //_pages.add(SettingsPage());
+    _pages.add(SettingsPage());
     var enableStartOnBoot =await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
     if (!enableStartOnBoot) {
                 // 1. request kIgnoreBatteryOptimizations
