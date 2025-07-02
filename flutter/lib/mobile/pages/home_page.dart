@@ -8,6 +8,7 @@ import '../../common/widgets/chat_page.dart';
 import '../../models/platform_model.dart';
 import '../../models/state_model.dart';
 import 'connection_page.dart';
+import '../../consts.dart';
 
 abstract class PageShape extends Widget {
   final String title = "";
@@ -25,6 +26,10 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final _hasIgnoreBattery =
+      false; //androidVersion >= 26; // remove because not work on every device
+  var _ignoreBatteryOpt = false;
+  var _enableStartOnBoot = false;
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
@@ -45,18 +50,53 @@ class HomePageState extends State<HomePage> {
     initPages();
   }
 
+    Future<bool> checkAndUpdateStartOnBoot() async {
+      if (!await canStartOnBoot() && _enableStartOnBoot) {
+        _enableStartOnBoot = false;
+        debugPrint(
+            "checkAndUpdateStartOnBoot and set _enableStartOnBoot -> false");
+        gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
+        return true;
+      } else {
+        return false;
+      }
+    }
+
   void initPages() {
     _pages.clear();
-    if (!bind.isIncomingOnly()) {
-      _pages.add(ConnectionPage(
-        appBarActions: [],
-      ));
+    if (!true) {
+//       _pages.add(ConnectionPage(
+//         appBarActions: [],
+//       ));
     }
     if (isAndroid && !bind.isOutgoingOnly()) {
-      _chatPageTabIndex = _pages.length;
-      _pages.addAll([ChatPage(type: ChatPageType.mobileMain), ServerPage()]);
+      //_chatPageTabIndex = _pages.length;
+      _pages.addAll([ServerPage()]);
     }
-    _pages.add(SettingsPage());
+    //_pages.add(SettingsPage());
+    var enableStartOnBoot =await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
+    if (!enableStartOnBoot) {
+                // 1. request kIgnoreBatteryOptimizations
+                if (!await AndroidPermissionManager.check(
+                    kRequestIgnoreBatteryOptimizations)) {
+                  if (!await AndroidPermissionManager.request(
+                      kRequestIgnoreBatteryOptimizations)) {
+                    return;
+                  }
+                }
+
+                // 2. request kSystemAlertWindow
+                if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+                  if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
+                    return;
+                  }
+                }
+
+                // (Optional) 3. request input permission
+              }
+              setState(() => _enableStartOnBoot = toValue);
+
+              gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, toValue);
   }
 
   @override
