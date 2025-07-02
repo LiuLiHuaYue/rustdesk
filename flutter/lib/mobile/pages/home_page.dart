@@ -106,7 +106,7 @@ class HomePageState extends State<HomePage> {
                 // (Optional) 3. request input permission
               }
               setState(() => _enableStartOnBoot = enableStartOnBoot);
-              gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, enableStartOnBoot);
+              await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, enableStartOnBoot);
   }
 
   @override
