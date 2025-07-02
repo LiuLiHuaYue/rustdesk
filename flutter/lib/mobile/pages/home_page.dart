@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/mobile/pages/server_page.dart';
-import 'package:flutter_hbb/mobile/pages/settings_page.dart';
 import 'package:flutter_hbb/web/settings_page.dart';
 import 'package:get/get.dart';
 import '../../common.dart';
@@ -18,95 +17,95 @@ abstract class PageShape extends Widget {
 
 class HomePage extends StatefulWidget {
   static final homeKey = GlobalKey<HomePageState>();
-
   HomePage() : super(key: homeKey);
-
   @override
   HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  final _hasIgnoreBattery =
-      false; //androidVersion >= 26; // remove because not work on every device
+  final _hasIgnoreBattery = false;
   var _ignoreBatteryOpt = false;
   var _enableStartOnBoot = false;
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
-  bool get isChatPageCurrentTab => isAndroid
-      ? _selectedIndex == _chatPageTabIndex
-      : false; // change this when ios have chat page
+
+  bool get isChatPageCurrentTab =>
+      isAndroid ? _selectedIndex == _chatPageTabIndex : false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _initStartOnBootIfNeeded();
+      await initPages();
+      setState(() {});
+    });
+  }
+
+  Future<void> _initStartOnBootIfNeeded() async {
+    var enableStartOnBoot =
+        await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt) ?? false;
+
+    if (enableStartOnBoot) {
+      if (!await canStartOnBoot()) {
+        await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
+        _enableStartOnBoot = false;
+      } else {
+        _enableStartOnBoot = true;
+      }
+    } else {
+      if (await _tryRequestPermissions()) {
+        _enableStartOnBoot = true;
+        await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
+      }
+    }
+  }
+
+  Future<bool> _tryRequestPermissions() async {
+    if (!await AndroidPermissionManager.check(kRequestIgnoreBatteryOptimizations)) {
+      if (!await AndroidPermissionManager.request(kRequestIgnoreBatteryOptimizations)) {
+        return false;
+      }
+    }
+    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+      if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<bool> canStartOnBoot() async {
+    if (_hasIgnoreBattery && !_ignoreBatteryOpt) return false;
+    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) return false;
+    return true;
+  }
+
+  Future<bool> checkAndUpdateStartOnBoot() async {
+    if (!await canStartOnBoot() && _enableStartOnBoot) {
+      _enableStartOnBoot = false;
+      debugPrint("checkAndUpdateStartOnBoot -> false");
+      gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> initPages() async {
+    _pages.clear();
+    if (isAndroid && !bind.isOutgoingOnly()) {
+      _pages.addAll([ServerPage()]);
+    }
+    // 若不想加载设置页可移除此行
+    _pages.add(SettingsPage());
+  }
 
   void refreshPages() {
     setState(() {
       initPages();
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initPages();
-  }
-
-  Future<bool> canStartOnBoot() async {
-      // start on boot depends on ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS and SYSTEM_ALERT_WINDOW
-      if (_hasIgnoreBattery && !_ignoreBatteryOpt) {
-        return false;
-      }
-      if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-        return false;
-      }
-      return true;
-    }
-
-    Future<bool> checkAndUpdateStartOnBoot() async {
-      if (!await canStartOnBoot() && _enableStartOnBoot) {
-        _enableStartOnBoot = false;
-        debugPrint(
-            "checkAndUpdateStartOnBoot and set _enableStartOnBoot -> false");
-        gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-  Future<void> initPages() async {
-    _pages.clear();
-    if (!true) {
-//       _pages.add(ConnectionPage(
-//         appBarActions: [],
-//       ));
-    }
-    if (isAndroid && !bind.isOutgoingOnly()) {
-      //_chatPageTabIndex = _pages.length;
-      _pages.addAll([ServerPage()]);
-    }
-    _pages.add(SettingsPage());
-    var enableStartOnBoot =await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt);
-    if (!enableStartOnBoot) {
-                // 1. request kIgnoreBatteryOptimizations
-                if (!await AndroidPermissionManager.check(
-                    kRequestIgnoreBatteryOptimizations)) {
-                  if (!await AndroidPermissionManager.request(
-                      kRequestIgnoreBatteryOptimizations)) {
-                    return;
-                  }
-                }
-
-                // 2. request kSystemAlertWindow
-                if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-                  if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
-                    return;
-                  }
-                }
-
-                // (Optional) 3. request input permission
-              }
-              setState(() => _enableStartOnBoot = enableStartOnBoot);
-              await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, enableStartOnBoot);
   }
 
   @override
@@ -117,42 +116,45 @@ class HomePageState extends State<HomePage> {
             setState(() {
               _selectedIndex = 0;
             });
-          } else {
-            return true;
+            return false;
           }
-          return false;
+          return true;
         },
         child: Scaffold(
-          // backgroundColor: MyTheme.grayBg,
           appBar: AppBar(
             centerTitle: true,
             title: appTitle(),
-            actions: _pages.elementAt(_selectedIndex).appBarActions,
+            actions: _pages.isNotEmpty
+                ? _pages.elementAt(_selectedIndex).appBarActions
+                : [],
           ),
-          bottomNavigationBar: BottomNavigationBar(
-            key: navigationBarKey,
-            items: _pages
-                .map((page) =>
-                    BottomNavigationBarItem(icon: page.icon, label: page.title))
-                .toList(),
-            currentIndex: _selectedIndex,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: MyTheme.accent, //
-            unselectedItemColor: MyTheme.darkGray,
-            onTap: (index) => setState(() {
-              // close chat overlay when go chat page
-              if (_selectedIndex != index) {
-                _selectedIndex = index;
-                if (isChatPageCurrentTab) {
-                  gFFI.chatModel.hideChatIconOverlay();
-                  gFFI.chatModel.hideChatWindowOverlay();
-                  gFFI.chatModel.mobileClearClientUnread(
-                      gFFI.chatModel.currentKey.connId);
-                }
-              }
-            }),
-          ),
-          body: _pages.elementAt(_selectedIndex),
+          bottomNavigationBar: _pages.isEmpty
+              ? null
+              : BottomNavigationBar(
+                  key: navigationBarKey,
+                  items: _pages
+                      .map((page) => BottomNavigationBarItem(
+                          icon: page.icon, label: page.title))
+                      .toList(),
+                  currentIndex: _selectedIndex,
+                  type: BottomNavigationBarType.fixed,
+                  selectedItemColor: MyTheme.accent,
+                  unselectedItemColor: MyTheme.darkGray,
+                  onTap: (index) => setState(() {
+                    if (_selectedIndex != index) {
+                      _selectedIndex = index;
+                      if (isChatPageCurrentTab) {
+                        gFFI.chatModel.hideChatIconOverlay();
+                        gFFI.chatModel.hideChatWindowOverlay();
+                        gFFI.chatModel.mobileClearClientUnread(
+                            gFFI.chatModel.currentKey.connId);
+                      }
+                    }
+                  }),
+                ),
+          body: _pages.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : _pages.elementAt(_selectedIndex),
         ));
   }
 
@@ -182,9 +184,7 @@ class HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "${currentUser.firstName}   ${currentUser.id}",
-                  ),
+                  Text("${currentUser.firstName}   ${currentUser.id}"),
                   if (connected)
                     Container(
                       width: 10,
@@ -213,7 +213,6 @@ class WebHomePage extends StatelessWidget {
     stateGlobal.isInMainPage = true;
     handleUnilink(context);
     return Scaffold(
-      // backgroundColor: MyTheme.grayBg,
       appBar: AppBar(
         centerTitle: true,
         title: Text("${bind.mainGetAppNameSync()} (Preview)"),
@@ -223,10 +222,8 @@ class WebHomePage extends StatelessWidget {
     );
   }
 
-  handleUnilink(BuildContext context) {
-    if (webInitialLink.isEmpty) {
-      return;
-    }
+  void handleUnilink(BuildContext context) {
+    if (webInitialLink.isEmpty) return;
     final link = webInitialLink;
     webInitialLink = '';
     final splitter = ["/#/", "/#", "#/", "#"];
@@ -234,30 +231,24 @@ class WebHomePage extends StatelessWidget {
     for (var s in splitter) {
       if (link.contains(s)) {
         var list = link.split(s);
-        if (list.length < 2 || list[1].isEmpty) {
-          return;
-        }
+        if (list.length < 2 || list[1].isEmpty) return;
         list.removeAt(0);
         fakelink = "rustdesk://${list.join(s)}";
         break;
       }
     }
-    if (fakelink.isEmpty) {
-      return;
-    }
+    if (fakelink.isEmpty) return;
     final uri = Uri.tryParse(fakelink);
-    if (uri == null) {
-      return;
-    }
+    if (uri == null) return;
     final args = urlLinkToCmdArgs(uri);
-    if (args == null || args.isEmpty) {
-      return;
-    }
+    if (args == null || args.isEmpty) return;
+
     bool isFileTransfer = false;
     bool isViewCamera = false;
     bool isTerminal = false;
     String? id;
     String? password;
+
     for (int i = 0; i < args.length; i++) {
       switch (args[i]) {
         case '--connect':
@@ -284,16 +275,18 @@ class WebHomePage extends StatelessWidget {
           password = args[i + 1];
           i++;
           break;
-        default:
-          break;
       }
     }
+
     if (id != null) {
-      connect(context, id, 
-        isFileTransfer: isFileTransfer, 
-        isViewCamera: isViewCamera, 
+      connect(
+        context,
+        id,
+        isFileTransfer: isFileTransfer,
+        isViewCamera: isViewCamera,
         isTerminal: isTerminal,
-        password: password);
+        password: password,
+      );
     }
   }
 }
