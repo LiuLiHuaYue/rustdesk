@@ -62,7 +62,7 @@ class HomePageState extends State<HomePage> {
       }
     }
 
-  void initPages() {
+  Future<void> initPages() async {
     _pages.clear();
     if (!true) {
 //       _pages.add(ConnectionPage(
