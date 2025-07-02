@@ -968,7 +968,7 @@ void showThemeSettings(OverlayDialogManager dialogManager) async {
 }
 
 void showAbout(OverlayDialogManager dialogManager) {
-  dialogManager.show((setState, close, context) {
+//  dialogManager.show((setState, close, context) {
 //    return CustomAlertDialog(
 //       title: Text(translate('About Maotai')),
 //       content: Wrap(direction: Axis.vertical, spacing: 12, children: [
@@ -987,8 +987,8 @@ void showAbout(OverlayDialogManager dialogManager) {
 //             )),
 //       ]),
 //       actions: [],
-    );
-  }, clickMaskDismiss: true, backDismiss: true);
+//    );
+//  }, clickMaskDismiss: true, backDismiss: true);
 }
 
 class ScanButton extends StatelessWidget {
