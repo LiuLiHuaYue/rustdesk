@@ -43,6 +43,44 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     initPages();
+    // 添加自动设置开机自启的逻辑
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _enableAutoStart();
+    });
+  }
+
+  Future<void> _enableAutoStart() async {
+    try {
+      // 1. 检查并请求悬浮窗权限
+      if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+        final granted = await AndroidPermissionManager.request(kSystemAlertWindow);
+        if (!granted) {
+          debugPrint("悬浮窗权限请求失败");
+          return;
+        }
+      }
+
+      // 2. 设置开机自启
+      gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
+      debugPrint("已启用开机自启");
+
+      // 3. 立即启动后台服务
+      if (await canStartService()) {
+        await bind.mainStartService();
+        debugPrint("服务已启动");
+      }
+    } catch (e) {
+      debugPrint("自动设置失败: $e");
+    }
+  }
+
+  // 检查是否可以启动服务
+  Future<bool> canStartService() async {
+    // 需要悬浮窗权限
+    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+      return false;
+    }
+    return true;
   }
 
   void initPages() {
