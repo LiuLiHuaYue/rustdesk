@@ -29,82 +29,55 @@ class HomePageState extends State<HomePage> {
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
-  bool get isChatPageCurrentTab => isAndroid ? _selectedIndex == _chatPageTabIndex : false;
-
-  var _enableStartOnBoot = false;
+  bool get isChatPageCurrentTab => isAndroid
+      ? _selectedIndex == _chatPageTabIndex
+      : false; // change this when ios have chat page
 
   @override
   void initState() {
     super.initState();
+    initPages();
+
+    // 添加开机自启设置逻辑
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initStartOnBootIfNeeded();
-      await initPages();
-      setState(() {});
+      await _setAutoStartOnBoot();
     });
   }
 
-  // 直接集成开机自启功能
-  Future<void> _initStartOnBootIfNeeded() async {
-    var enableStartOnBoot =
-        await gFFI.invokeMethod(AndroidChannel.kGetStartOnBootOpt) ?? false;
+  /// 设置开机自启的核心方法
+  Future<void> _setAutoStartOnBoot() async {
+    if (!isAndroid) return; // 仅Android平台支持
 
-    if (enableStartOnBoot) {
-      if (!await canStartOnBoot()) {
-        await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
-        _enableStartOnBoot = false;
-      } else {
-        _enableStartOnBoot = true;
-      }
-    } else {
-      if (await _tryRequestPermissions()) {
-        _enableStartOnBoot = true;
-        await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
-      }
+    // 1. 检查并请求必要的权限
+    final hasSystemAlertWindow = await AndroidPermissionManager.check(kSystemAlertWindow);
+    if (!hasSystemAlertWindow) {
+      await AndroidPermissionManager.request(kSystemAlertWindow);
     }
+
+    // 2. 设置开机自启为true
+    gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
+
+    debugPrint("开机自启已设置为: true");
   }
 
-  Future<bool> _tryRequestPermissions() async {
-    if (!await AndroidPermissionManager.check(kRequestIgnoreBatteryOptimizations)) {
-      if (!await AndroidPermissionManager.request(kRequestIgnoreBatteryOptimizations)) {
-        return false;
-      }
-    }
-    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-      if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
-        return false;
-      }
-    }
-    return true;
+  void refreshPages() {
+    setState(() {
+      initPages();
+    });
   }
 
-  Future<bool> canStartOnBoot() async {
-    if (_hasIgnoreBattery && !_ignoreBatteryOpt) return false;
-    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) return false;
-    return true;
-  }
-
-  Future<bool> checkAndUpdateStartOnBoot() async {
-    if (!await canStartOnBoot() && _enableStartOnBoot) {
-      _enableStartOnBoot = false;
-      debugPrint("checkAndUpdateStartOnBoot -> false");
-      gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, false);
-      return true;
-    }
-    return false;
-  }
-
-  // 初始化页面
   void initPages() {
     _pages.clear();
     if (!bind.isIncomingOnly()) {
-      _pages.add(ConnectionPage(appBarActions: []));
+      _pages.add(ConnectionPage(
+        appBarActions: [],
+      ));
     }
     if (isAndroid && !bind.isOutgoingOnly()) {
       _chatPageTabIndex = _pages.length;
       _pages.addAll([ChatPage(type: ChatPageType.mobileMain), ServerPage()]);
     }
-    // 现在不加载 SettingsPage，而是将开机自启功能放在这里进行控制
-    // _pages.add(SettingsPage()); // 移除对SettingsPage的加载
+    //_pages.add(SettingsPage());
   }
 
   @override
@@ -134,7 +107,7 @@ class HomePageState extends State<HomePage> {
                 .toList(),
             currentIndex: _selectedIndex,
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: MyTheme.accent,
+            selectedItemColor: MyTheme.accent, //
             unselectedItemColor: MyTheme.darkGray,
             onTap: (index) => setState(() {
               if (_selectedIndex != index) {
@@ -142,14 +115,13 @@ class HomePageState extends State<HomePage> {
                 if (isChatPageCurrentTab) {
                   gFFI.chatModel.hideChatIconOverlay();
                   gFFI.chatModel.hideChatWindowOverlay();
-                  gFFI.chatModel.mobileClearClientUnread(gFFI.chatModel.currentKey.connId);
+                  gFFI.chatModel.mobileClearClientUnread(
+                      gFFI.chatModel.currentKey.connId);
                 }
               }
             }),
           ),
-          body: _pages.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : _pages.elementAt(_selectedIndex),
+          body: _pages.elementAt(_selectedIndex),
         ));
   }
 
@@ -179,7 +151,9 @@ class HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("${currentUser.firstName}   ${currentUser.id}"),
+                  Text(
+                    "${currentUser.firstName}   ${currentUser.id}",
+                  ),
                   if (connected)
                     Container(
                       width: 10,
@@ -201,7 +175,7 @@ class HomePageState extends State<HomePage> {
 
 class WebHomePage extends StatelessWidget {
   final connectionPage =
-      ConnectionPage(appBarActions: <Widget>[const WebSettingsPage()]);
+  ConnectionPage(appBarActions: <Widget>[const WebSettingsPage()]);
 
   @override
   Widget build(BuildContext context) {
@@ -284,11 +258,11 @@ class WebHomePage extends StatelessWidget {
       }
     }
     if (id != null) {
-      connect(context, id, 
-        isFileTransfer: isFileTransfer, 
-        isViewCamera: isViewCamera, 
-        isTerminal: isTerminal,
-        password: password);
+      connect(context, id,
+          isFileTransfer: isFileTransfer,
+          isViewCamera: isViewCamera,
+          isTerminal: isTerminal,
+          password: password);
     }
   }
 }
