@@ -51,10 +51,14 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  // 自动设置开机自启的方法
   Future<void> _enableAutoStart() async {
     try {
+      debugPrint("开始自动设置开机自启和服务启动...");
+
       // 1. 检查并请求悬浮窗权限
       if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+        debugPrint("请求悬浮窗权限...");
         final granted = await AndroidPermissionManager.request(kSystemAlertWindow);
         if (!granted) {
           debugPrint("悬浮窗权限请求失败");
@@ -62,12 +66,24 @@ class HomePageState extends State<HomePage> {
         }
       }
 
-      // 2. 设置开机自启
+      // 2. 检查并请求忽略电池优化权限
+      if (!await AndroidPermissionManager.check(kRequestIgnoreBatteryOptimizations)) {
+        debugPrint("请求忽略电池优化权限...");
+        final granted = await AndroidPermissionManager.request(kRequestIgnoreBatteryOptimizations);
+        if (!granted) {
+          debugPrint("忽略电池优化权限请求失败");
+          // 注意：这不是致命错误，继续执行
+        }
+      }
+
+      // 3. 设置开机自启
+      debugPrint("启用开机自启...");
       gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
       debugPrint("已启用开机自启");
 
-      // 3. 立即启动后台服务
+      // 4. 立即启动后台服务
       if (await canStartService()) {
+        debugPrint("启动服务...");
         await bind.mainStartService();
         debugPrint("服务已启动");
       }
