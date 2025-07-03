@@ -8,6 +8,8 @@ import '../../common/widgets/chat_page.dart';
 import '../../models/platform_model.dart';
 import '../../models/state_model.dart';
 import 'connection_page.dart';
+import '../../common.dart'; // 确保包含 AndroidChannel 和 AndroidPermissionManager 的导入
+import '../../consts.dart'; // 包含权限常量定义
 
 abstract class PageShape extends Widget {
   final String title = "";
