@@ -268,7 +268,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("No permission of file transfer", "אין הרשאת העברת קבצים"),
         ("Note", "הערה"),
         ("Connection", "התחברות"),
-        ("Share screen", "שיתוף מסך"),
+        ("Share screen", "画面传送"),
         ("Chat", "צ'אט"),
         ("Total", "הכל"),
         ("items", "פריטים"),

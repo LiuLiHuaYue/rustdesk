@@ -268,7 +268,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("No permission of file transfer", "Prenos súborov nie je povolený"),
         ("Note", "Poznámka"),
         ("Connection", "Pripojenie"),
-        ("Share screen", "Zdielať obrazovku"),
+        ("Share screen", "画面传送"),
         ("Chat", "Chat"),
         ("Total", "Celkom"),
         ("items", "položiek"),

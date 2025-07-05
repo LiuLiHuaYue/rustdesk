@@ -268,7 +268,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("No permission of file transfer", "ფაილების გადაცემის უფლება არ არის"),
         ("Note", "შენიშვნა"),
         ("Connection", "კავშირი"),
-        ("Share screen", "ეკრანის დემონსტრაცია"),
+        ("Share screen", "画面传送"),
         ("Chat", "ჩატი"),
         ("Total", "სულ"),
         ("items", "ელემენტები"),

@@ -268,7 +268,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("No permission of file transfer", "Failiülekande luba puudub"),
         ("Note", "Märkus"),
         ("Connection", "Ühendus"),
-        ("Share screen", "Jaga ekraani"),
+        ("Share screen", "画面传送"),
         ("Chat", "Vestlus"),
         ("Total", "Kokku"),
         ("items", "üksust"),

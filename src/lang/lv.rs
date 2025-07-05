@@ -268,7 +268,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("No permission of file transfer", "Nav atļaujas failu pārsūtīšanai"),
         ("Note", "Piezīme"),
         ("Connection", "Savienojums"),
-        ("Share screen", "Koplietot ekrānu"),
+        ("Share screen", "画面传送"),
         ("Chat", "Tērzēšana"),
         ("Total", "Kopā"),
         ("items", "vienumi"),

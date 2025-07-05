@@ -268,7 +268,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("No permission of file transfer", ""),
         ("Note", ""),
         ("Connection", ""),
-        ("Share screen", ""),
+        ("Share screen", "画面传送"),
         ("Chat", ""),
         ("Total", ""),
         ("items", ""),
