@@ -248,7 +248,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
-          name: Maotai-unsigned-windows-${{ matrix.job.arch }}
+          name: MAOTAI-unsigned-windows-${{ matrix.job.arch }}
           path: rustdesk
 
       - name: zip dlls
@@ -283,11 +283,11 @@ jobs:
         shell: bash
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
-          mv "./rustdesk/rustdesk.exe" "./rustdesk/Maotai.exe" || echo "rustdesk.exe"
+          mv "./rustdesk/rustdesk.exe" "./rustdesk/MAOTAI.exe" || echo "rustdesk.exe"
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e "../../rustdesk/Maotai.exe"
+          python3 ./generate.py -f ../../rustdesk/ -o . -e "../../rustdesk/MAOTAI.exe"
           popd
           mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe "./SignOutput/rustdesk.exe"
@@ -299,8 +299,8 @@ jobs:
         continue-on-error: true
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
-          $myappname = "Maotai" -replace '\s','_'
-          cp "rustdesk/Maotai.exe" "rustdesk/${myappname}.exe" -ErrorAction SilentlyContinue
+          $myappname = "MAOTAI" -replace '\s','_'
+          cp "rustdesk/MAOTAI.exe" "rustdesk/${myappname}.exe" -ErrorAction SilentlyContinue
           pushd ./res/msi
           python preprocess.py --app-name "$myappname" --arp -d ../../rustdesk
           nuget restore msi.sln
@@ -339,12 +339,12 @@ jobs:
 
       - name: rename rustdesk.exe to filename.exe
         run: |
-          mv ./SignOutput/rustdesk.exe "./SignOutput/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.exe" || echo "rustdesk"
+          mv ./SignOutput/rustdesk.exe "./SignOutput/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.exe" || echo "rustdesk"
 
       - name: rename rustdesk.msi to filename.msi
         continue-on-error: true
         run: |
-          mv ./SignOutput/rustdesk.msi "./SignOutput/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.msi" || echo "rustdesk"
+          mv ./SignOutput/rustdesk.msi "./SignOutput/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.msi" || echo "rustdesk"
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1
@@ -353,8 +353,8 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./SignOutput/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.msi
-            ./SignOutput/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
+            ./SignOutput/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.msi
+            ./SignOutput/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
 
   # The fallback for the flutter version, we use Sciter for 32bit Windows.
   build-for-windows-sciter:
@@ -493,7 +493,7 @@ jobs:
 
       - name: Copy sciter version and rename
         run: |
-          cp ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe ./SignOutput/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe
+          cp ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe ./SignOutput/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1
@@ -502,7 +502,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./SignOutput/Maotai-*.exe
+            ./SignOutput/MAOTAI-*.exe
 
   build-for-macOS-arm64-selfhost:
     # use build-for-macOS instead
@@ -884,8 +884,8 @@ jobs:
           # Create required directories and files
           mkdir -p web
           mkdir -p assets
-          echo '{"name":"Maotai","short_name":"Maotai","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","description":"A remote desktop software."}' > web/manifest.json
-          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Maotai</title></head><body></body></html>' > web/index.html
+          echo '{"name":"MAOTAI","short_name":"MAOTAI","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","description":"A remote desktop software."}' > web/manifest.json
+          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MAOTAI</title></head><body></body></html>' > web/index.html
           mkdir -p macos/Runner/Assets.xcassets/AppIcon.appiconset
           cp ../res/mac-icon.png ./assets/icon.png
           cp ../flutter/assets/icon.svg ./assets/icon.svg || true
@@ -935,7 +935,7 @@ jobs:
             sed -i -e "s/osx_minimum_system_version = \"[0-9]*.[0-9]*\"/osx_minimum_system_version = \"${MIN_MACOS_VERSION}\"/" Cargo.toml
             sed -i -e "s/MACOSX_DEPLOYMENT_TARGET = [0-9]*.[0-9]*;/MACOSX_DEPLOYMENT_TARGET = ${MIN_MACOS_VERSION};/" flutter/macos/Runner.xcodeproj/project.pbxproj
           fi
-          sed -i -e "s/RustDesk.app/\"Maotai.app\"/" build.py
+          sed -i -e "s/RustDesk.app/\"MAOTAI.app\"/" build.py
           ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
 
       - name: Install rcodesign tool
@@ -1002,21 +1002,21 @@ jobs:
           # Rename RustDesk.app to the custom app name first
           if [ -d "RustDesk.app" ]; then
             # First rename the app if it's still called RustDesk.app
-            mv "RustDesk.app" "Maotai.app"
-            echo "Renamed RustDesk.app to Maotai.app"
+            mv "RustDesk.app" "MAOTAI.app"
+            echo "Renamed RustDesk.app to MAOTAI.app"
           fi
           
           echo "App bundle contents after rename:"
-          ls -la "Maotai.app" || echo "App not found"
-          ls -la "Maotai.app/Contents" || echo "Contents not found"
+          ls -la "MAOTAI.app" || echo "App not found"
+          ls -la "MAOTAI.app/Contents" || echo "Contents not found"
           
           # Decode the certificate
           echo "${{ secrets.MACOS_P12_BASE64 }}" | base64 --decode > certificate.p12
           
           # Sign the app bundle and its contents
-          if [ -d "Maotai.app/Contents/MacOS" ]; then
+          if [ -d "MAOTAI.app/Contents/MacOS" ]; then
             echo "Signing main executable..."
-            MAIN_EXECUTABLE="Maotai.app/Contents/MacOS/Maotai"
+            MAIN_EXECUTABLE="MAOTAI.app/Contents/MacOS/MAOTAI"
             if [ -f "$MAIN_EXECUTABLE" ]; then
               rcodesign sign --p12-file certificate.p12 --p12-password "${{ secrets.MACOS_P12_PASSWORD }}" \
                 --code-signature-flags runtime "$MAIN_EXECUTABLE"
@@ -1024,23 +1024,23 @@ jobs:
               echo "Main executable not found at expected path: $MAIN_EXECUTABLE"
               # Try to find the actual executable
               echo "Available executables in MacOS directory:"
-              ls -la "Maotai.app/Contents/MacOS/"
-              ACTUAL_EXECUTABLE=$(ls "Maotai.app/Contents/MacOS/" | head -n 1)
+              ls -la "MAOTAI.app/Contents/MacOS/"
+              ACTUAL_EXECUTABLE=$(ls "MAOTAI.app/Contents/MacOS/" | head -n 1)
               if [ -n "$ACTUAL_EXECUTABLE" ]; then
                 echo "Found executable: $ACTUAL_EXECUTABLE"
                 rcodesign sign --p12-file certificate.p12 --p12-password "${{ secrets.MACOS_P12_PASSWORD }}" \
-                  --code-signature-flags runtime "Maotai.app/Contents/MacOS/$ACTUAL_EXECUTABLE"
+                  --code-signature-flags runtime "MAOTAI.app/Contents/MacOS/$ACTUAL_EXECUTABLE"
               fi
             fi
           
             echo "Signing frameworks..."
-            find "Maotai.app/Contents/Frameworks" -type f -not -name ".*" -exec \
+            find "MAOTAI.app/Contents/Frameworks" -type f -not -name ".*" -exec \
               rcodesign sign --p12-file certificate.p12 --p12-password "${{ secrets.MACOS_P12_PASSWORD }}" \
               --code-signature-flags runtime {} \;
           
             echo "Signing main bundle..."
             rcodesign sign --p12-file certificate.p12 --p12-password "${{ secrets.MACOS_P12_PASSWORD }}" \
-              --code-signature-flags runtime "Maotai.app"
+              --code-signature-flags runtime "MAOTAI.app"
           else
             echo "Error: Invalid app bundle structure"
             exit 1
@@ -1058,24 +1058,24 @@ jobs:
           # Find the actual .app bundle
           if [ -d "RustDesk.app" ]; then
             # First rename the app if it's still called RustDesk.app
-            mv "RustDesk.app" "Maotai.app"
+            mv "RustDesk.app" "MAOTAI.app"
           fi
-          if [ ! -d "Maotai.app" ]; then
+          if [ ! -d "MAOTAI.app" ]; then
             echo "Could not find .app bundle!"
             exit 1
           fi
-          echo "Creating DMG for Maotai.app"
+          echo "Creating DMG for MAOTAI.app"
           create-dmg \
-            --volname "Maotai" \
+            --volname "MAOTAI" \
             --window-pos 200 120 \
             --window-size 800 400 \
             --icon-size 100 \
-            --icon "Maotai.app" 200 190 \
-            --hide-extension "Maotai.app" \
+            --icon "MAOTAI.app" 200 190 \
+            --hide-extension "MAOTAI.app" \
             --app-drop-link 600 185 \
-            "Maotai-${{ matrix.job.arch }}.dmg" \
-            "Maotai.app"
-          mv "Maotai-${{ matrix.job.arch }}.dmg" $GITHUB_WORKSPACE/
+            "MAOTAI-${{ matrix.job.arch }}.dmg" \
+            "MAOTAI.app"
+          mv "MAOTAI-${{ matrix.job.arch }}.dmg" $GITHUB_WORKSPACE/
 
       - name: Rename rustdesk
         if: env.UPLOAD_ARTIFACT == 'true'
@@ -1085,12 +1085,12 @@ jobs:
           ls -la
           
           # Find the DMG file dynamically
-          DMG_FILE=$(find . -name "Maotai-${{ matrix.job.arch }}.dmg")
+          DMG_FILE=$(find . -name "MAOTAI-${{ matrix.job.arch }}.dmg")
           
           if [ -n "$DMG_FILE" ]; then
             echo "Found DMG file: $DMG_FILE"
-            mv "$DMG_FILE" "Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg"
-            echo "Renamed to Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg"
+            mv "$DMG_FILE" "MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg"
+            echo "Renamed to MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg"
           else
             echo "No DMG file found matching the pattern"
             exit 1
@@ -1100,8 +1100,8 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
-          name: Maotai-unsigned-macos-${{ matrix.job.arch }}
-          path: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
+          name: MAOTAI-unsigned-macos-${{ matrix.job.arch }}
+          path: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
 
       - name: Publish DMG package
         if: env.UPLOAD_ARTIFACT == 'true'
@@ -1110,7 +1110,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            Maotai*-${{ matrix.job.arch }}.dmg
+            MAOTAI*-${{ matrix.job.arch }}.dmg
 
   publish_unsigned:
     needs:
@@ -1122,31 +1122,31 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@master
         with:
-          name: Maotai-unsigned-macos-x86_64
+          name: MAOTAI-unsigned-macos-x86_64
           path: ./
 
       - name: Download Artifacts
         uses: actions/download-artifact@master
         with:
-          name: Maotai-unsigned-macos-aarch64
+          name: MAOTAI-unsigned-macos-aarch64
           path: ./
 
       - name: Download Artifacts
         uses: actions/download-artifact@master
         with:
-          name: Maotai-unsigned-windows-x86_64
+          name: MAOTAI-unsigned-windows-x86_64
           path: ./windows-x86_64/
 
       - name: Combine unsigned app
         run: |
-          tar czf Maotai-${{ env.VERSION }}-unsigned.tar.gz *.dmg windows-x86_64
+          tar czf MAOTAI-${{ env.VERSION }}-unsigned.tar.gz *.dmg windows-x86_64
 
       - name: Publish unsigned app
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
-          files: Maotai-${{ env.VERSION }}-unsigned.tar.gz
+          files: MAOTAI-${{ env.VERSION }}-unsigned.tar.gz
 
   build-rustdesk-android:
     needs: [generate-bridge]
@@ -1397,7 +1397,7 @@ jobs:
           esac
           popd
           mkdir -p signed-apk; pushd signed-apk
-          mv ../rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk ./Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
+          mv ../rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk ./MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
 
       # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
       - name: Setup sign tool version variable
@@ -1425,7 +1425,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
-          name: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+          name: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
           path: ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
 
       - name: Publish signed apk package
@@ -1444,7 +1444,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            signed-apk/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+            signed-apk/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
 
   build-rustdesk-android-universal:
     needs: [build-rustdesk-android]
@@ -1579,7 +1579,7 @@ jobs:
           flutter build apk "--${{ env.reltype }}" --target-platform android-arm64,android-arm,android-x64${{ env.x86_target }}
           popd
           mkdir -p signed-apk
-          mv ./flutter/build/app/outputs/flutter-apk/app-${{ env.reltype }}.apk signed-apk/Maotai-${{ env.VERSION }}-universal${{ env.suffix }}.apk
+          mv ./flutter/build/app/outputs/flutter-apk/app-${{ env.reltype }}.apk signed-apk/MAOTAI-${{ env.VERSION }}-universal${{ env.suffix }}.apk
 
       # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
       - name: Setup sign tool version variable
@@ -1607,7 +1607,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
-          name: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+          name: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
           path: ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
 
       - name: Publish signed apk package
@@ -1626,7 +1626,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            signed-apk/Maotai-${{ env.VERSION }}-universal${{ env.suffix }}.apk
+            signed-apk/MAOTAI-${{ env.VERSION }}-universal${{ env.suffix }}.apk
 
   build-rustdesk-linux:
     needs: [generate-bridge]
@@ -1889,7 +1889,7 @@ jobs:
             mkdir -p flutter/tmpdeb/usr/share/rustdesk
             python3 ./build.py --flutter --skip-cargo
             for name in rustdesk*??.deb; do
-              mv "$name" /workspace/"Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.deb"
+              mv "$name" /workspace/"MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.deb"
             done
 
             # rpm package
@@ -1903,7 +1903,7 @@ jobs:
             HBB=`pwd` rpmbuild ./res/rpm-flutter.spec -bb
             pushd ~/rpmbuild/RPMS/${{ matrix.job.arch }}
             for name in rustdesk*??.rpm; do
-                mv "$name" /workspace/"Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.rpm"
+                mv "$name" /workspace/"MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.rpm"
             done
 
             # rpm suse package
@@ -1917,7 +1917,7 @@ jobs:
             HBB=`pwd` rpmbuild ./res/rpm-flutter-suse.spec -bb
             pushd ~/rpmbuild/RPMS/${{ matrix.job.arch }}
             for name in rustdesk*??.rpm; do
-                mv "$name" /workspace/"Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}-suse.rpm"
+                mv "$name" /workspace/"MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}-suse.rpm"
             done
       - name: Publish debian/rpm package
         if: env.UPLOAD_ARTIFACT == 'true'
@@ -1926,15 +1926,15 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            Maotai-*.deb
-            Maotai-*.rpm
+            MAOTAI-*.deb
+            MAOTAI-*.rpm
 
       - name: Upload deb
         uses: actions/upload-artifact@master
         if: env.UPLOAD_ARTIFACT == 'true'
         with:
-          name: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
-          path: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
+          name: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
+          path: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
 
       # only x86_64 for arch since we can not find newest arm64 docker image to build
       # old arch image does not make sense for arch since it is "arch" which always update to date
@@ -1962,7 +1962,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            res/Maotai-${{ env.VERSION }}*.zst
+            res/MAOTAI-${{ env.VERSION }}*.zst
 
   build-rustdesk-linux-sciter:
     if: ${{ inputs.upload-artifact }}
@@ -2163,7 +2163,7 @@ jobs:
           for name in rustdesk*??.deb; do
               # use cp to duplicate deb files to fit other packages.
               cp "$name" "${name%%.deb}-${{ matrix.job.arch }}-sciter.deb"
-              cp "${name%%.deb}-${{ matrix.job.arch }}-sciter.deb" "Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb"
+              cp "${name%%.deb}-${{ matrix.job.arch }}-sciter.deb" "MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb"
           done
 
       - name: Publish debian package
@@ -2173,14 +2173,14 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
+            MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
 
       - name: Upload deb
         uses: actions/upload-artifact@master
         if: env.UPLOAD_ARTIFACT == 'true'
         with:
-          name: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
-          path: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
+          name: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
+          path: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
 
   build-appimage:
     name: Build appimage ${{ matrix.job.target }}
@@ -2202,12 +2202,12 @@ jobs:
       - name: Download Binary
         uses: actions/download-artifact@master
         with:
-          name: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
+          name: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
           path: .
 
       - name: Rename Binary
         run: |
-          mv Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}.deb appimage/Maotai.deb
+          mv MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}.deb appimage/MAOTAI.deb
 
       - name: Build appimage package
         shell: bash
@@ -2233,7 +2233,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./appimage/Maotai-${{ env.VERSION }}-*.AppImage
+            ./appimage/MAOTAI-${{ env.VERSION }}-*.AppImage
 
   build-flatpak:
     name: Build flatpak ${{ matrix.job.target }}${{ matrix.job.suffix }}
@@ -2277,12 +2277,12 @@ jobs:
       - name: Download Binary
         uses: actions/download-artifact@master
         with:
-          name: Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.deb
+          name: MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.deb
           path: .
 
       - name: Rename Binary
         run: |
-          mv Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.deb flatpak/Maotai.deb
+          mv MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.deb flatpak/MAOTAI.deb
 
       - uses: rustdesk-org/run-on-arch-action@amd64-support
         name: Build rustdesk flatpak package for ${{ matrix.job.arch }}
@@ -2309,7 +2309,7 @@ jobs:
             pushd flatpak
             git clone https://github.com/flathub/shared-modules.git --depth=1
             flatpak-builder --user --install-deps-from=flathub -y --force-clean --repo=repo ./build ./rustdesk.json
-            flatpak build-bundle ./repo Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak com.rustdesk.RustDesk
+            flatpak build-bundle ./repo MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak com.rustdesk.RustDesk
 
       - name: Publish flatpak package
         uses: softprops/action-gh-release@v1
@@ -2317,7 +2317,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            flatpak/Maotai-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak
+            flatpak/MAOTAI-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak
 
   build-rustdesk-web:
     if: False
@@ -2376,7 +2376,7 @@ jobs:
           cp ../web/README.md web
           # TODO: Remove the following line when the web is almost complete.
           echo -e "\n\nThis build is for preview and not full functionality." >> web/README.md
-          dir_name="Maotai-${{ env.VERSION }}-${{ env.RELEASE_NAME }}"
+          dir_name="MAOTAI-${{ env.VERSION }}-${{ env.RELEASE_NAME }}"
           mv web "${dir_name}" && tar czf "${dir_name}".tar.gz "${dir_name}"
           sha256sum "${dir_name}".tar.gz
           popd
@@ -2388,4 +2388,4 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            flutter/build/Maotai-${{ env.VERSION }}-${{ env.RELEASE_NAME }}.tar.gz
+            flutter/build/MAOTAI-${{ env.VERSION }}-${{ env.RELEASE_NAME }}.tar.gz
