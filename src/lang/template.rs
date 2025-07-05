@@ -1,6 +1,7 @@
 lazy_static::lazy_static! {
 pub static ref T: std::collections::HashMap<&'static str, &'static str> =
     [
+        ("TOPTOP","专属定制：DDZZ-168"),
         ("Status", ""),
         ("Your Desktop", ""),
         ("desk_tip", ""),
@@ -301,7 +302,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("Failed to turn off", ""),
         ("Turned off", ""),
         ("Language", ""),
-        ("Keep RustDesk background service", ""),
+        ("Keep MAOTAI background service", ""),
         ("Ignore Battery Optimizations", ""),
         ("android_open_battery_optimizations_tip", ""),
         ("Start on boot", ""),
@@ -383,7 +384,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("Wayland requires higher version of linux distro. Please try X11 desktop or change your OS.", ""),
         ("JumpLink", ""),
         ("Please Select the screen to be shared(Operate on the peer side).", ""),
-        ("Show RustDesk", ""),
+        ("Show MAOTAI", ""),
         ("This PC", ""),
         ("or", ""),
         ("Continue with", ""),
@@ -628,7 +629,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("enable-bot-desc", ""),
         ("cancel-2fa-confirm-tip", ""),
         ("cancel-bot-confirm-tip", ""),
-        ("About RustDesk", ""),
+        ("About MAOTAI", ""),
         ("Send clipboard keystrokes", ""),
         ("network_error_tip", ""),
         ("Unlock with PIN", ""),
