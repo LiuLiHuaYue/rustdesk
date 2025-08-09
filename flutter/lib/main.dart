@@ -28,6 +28,8 @@ import 'consts.dart';
 import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
 import 'models/platform_model.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import 'package:flutter_hbb/plugin/handlers.dart'
     if (dart.library.html) 'package:flutter_hbb/web/plugin/handlers.dart';
@@ -37,12 +39,83 @@ int? kWindowId;
 WindowType? kWindowType;
 late List<String> kBootArgs;
 
+String getLogPath() {
+  if (Platform.isWindows) {
+    return 'D:/auth_log.txt';
+  } else {
+    // 其他平台的默认路径
+    return '/tmp/auth_log.txt';
+  }
+}
+
+// 写入日志的方法
+Future<void> writeLog(String message) async {
+  try {
+    final logFile = File(getLogPath());
+
+    // 确保日志文件存在
+    if (!await logFile.exists()) {
+      await logFile.create(recursive: true);
+    }
+
+    // 添加时间戳并写入日志
+    final timestamp = DateTime.now().toString();
+    await logFile.writeAsString(
+      '[$timestamp] $message\n',
+      mode: FileMode.append,
+    );
+  } catch (e) {
+    // 如果日志写入失败，回退到控制台输出
+    print('日志写入失败: $e');
+    print('原始消息: $message');
+  }
+}
+
+
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
-
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
+  WidgetsFlutterBinding.ensureInitialized();
+  // 记录启动日志
+  await writeLog("开始认证密钥文件测试...");
+
+  try {
+    // 获取应用支持目录
+    final appSupportDir = await getApplicationSupportDirectory();
+    final targetDir = path.join(appSupportDir.path, 'RDAuth');
+
+    // 确保目录存在
+    final dir = Directory(targetDir);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+      await writeLog("✅ 目录已创建: $targetDir");
+    } else {
+      await writeLog("ℹ️ 目录已存在: $targetDir");
+    }
+
+    // 文件路径
+    final filePath = path.join(targetDir, 'auth.key');
+    final authFile = File(filePath);
+
+    // 写入测试
+    if (!await authFile.exists()) {
+      const testContent = '测试密钥: ABC123-xyz789';
+      await authFile.writeAsString(testContent);
+      await writeLog("✅ 文件已写入: $filePath");
+      await writeLog("   内容: '$testContent'");
+    }
+
+    // 读取测试
+    final readContent = await authFile.readAsString();
+    await writeLog("✅ 文件已读取");
+    await writeLog("   内容: '$readContent'");
+    // 确保进程退出
+  } catch (e) {
+    await writeLog("\n❌ 发生错误: $e");
+    // 确保进程退出
+  }
 
   if (!isDesktop) {
     runMobileApp();
