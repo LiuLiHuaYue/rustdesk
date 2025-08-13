@@ -37,48 +37,51 @@ int? kWindowId;
 WindowType? kWindowType;
 late List<String> kBootArgs;
 
-Future<void> initMinimalEnvForActivation() async {
-  // 只初始化绑定和存储，不初始化API核心模块
-  await platformFFI.init(kAppTypeMain);
-  AuthService.setCallbacks(
-    getOption: (key) => bind.mainGetOption(key: key),
-    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
-  );
-}
-
-Future<void> initFullEnv(String appType) async {
-  // 全局FFI初始化
-  await initGlobalFFI();
-
-  // 注册事件处理器
-  _registerEventHandler();
-
-  // 更新系统主题
-  updateSystemWindowTheme();
-
-  // 初始化API相关服务
-  if (startService) {
-    gFFI.serverModel.startService();
-    bind.pluginSyncUi(syncTo: kAppTypeMain);
-    bind.pluginListReload();
-  }
-  await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
-  gFFI.userModel.refreshCurrentUser();
-}
-
-
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
 
-  await initMinimalEnvForActivation();
-  final activated = await AuthService.verify();
-  if (!activated) {
-    await AuthService.showGlobalActivationDialog();
-    final reactivated = await AuthService.verify();
-    if (!reactivated) exit(0);
+  await initEnv(kAppTypeMain);
+
+  // 在 initEnv 之后添加激活验证
+  bool activationRequired = true; // 默认为需要激活
+
+  try {
+    // 检查是否已激活
+    final activated = await AuthService.verify();
+    if (!activated) {
+      // 显示激活对话框
+      final success = await AuthService.showGlobalActivationDialog();
+      if (!success) {
+        exit(0); // 用户取消激活或激活失败
+      }
+
+      // 再次验证激活状态
+      final reactivated = await AuthService.verify();
+      if (!reactivated) {
+        exit(0); // 激活后验证失败
+      }
+    }
+    activationRequired = false; // 标记为不需要激活
+  } catch (e) {
+    debugPrint("Activation error: $e");
+    // 即使激活出错也继续运行，但标记为需要激活
   }
-  await initFullEnv(kAppTypeMain);
+
+  // 如果激活状态发生变化，重新初始化API相关服务
+  if (!activationRequired) {
+    debugPrint("Reinitializing API services after activation");
+    if (isDesktop && desktopType == DesktopType.main) {
+      // 重新启动服务
+      gFFI.serverModel.startService();
+      bind.pluginSyncUi(syncTo: kAppTypeMain);
+      bind.pluginListReload();
+    }
+
+    // 重新加载缓存
+    await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
+    gFFI.userModel.refreshCurrentUser();
+  }
 
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
@@ -159,7 +162,16 @@ Future<void> main(List<String> args) async {
 }
 
 Future<void> initEnv(String appType) async {
-  await initFullEnv(appType);
+  // global shared preference
+  await platformFFI.init(appType);
+  // global FFI, use this **ONLY** for global configuration
+  // for convenience, use global FFI on mobile platform
+  // focus on multi-ffi on desktop first
+  await initGlobalFFI();
+  // await Firebase.initializeApp();
+  _registerEventHandler();
+  // Update the system theme.
+  updateSystemWindowTheme();
 }
 
 void runMainApp(bool startService) async {
@@ -217,7 +229,7 @@ void runMultiWindow(
   Map<String, dynamic> argument,
   String appType,
 ) async {
-  await initFullEnv(appType);
+  await initEnv(appType);
   final title = getWindowName();
   // set prevent close to true, we handle close event manually
   WindowController.fromWindowId(kWindowId!).setPreventClose(true);
@@ -311,7 +323,7 @@ void runMultiWindow(
 }
 
 void runConnectionManagerScreen() async {
-  await initFullEnv(kAppTypeConnectionManager);
+  await initEnv(kAppTypeConnectionManager);
   _runApp(
     '',
     const DesktopServerPage(),
@@ -414,7 +426,7 @@ void _runApp(
 
 void runInstallPage() async {
   await windowManager.ensureInitialized();
-  await initFullEnv(kAppTypeMain);
+  await initEnv(kAppTypeMain);
   _runApp('', const InstallPage(), MyTheme.currentThemeMode());
   WindowOptions windowOptions =
       getHiddenTitleBarWindowOptions(size: Size(800, 600), center: true);

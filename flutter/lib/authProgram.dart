@@ -350,27 +350,12 @@ class _ActivationDialogState extends State<ActivationDialog> {
         }
         BotToast.closeAllLoading();
 
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('激活成功'),
-              content: const Text('激活成功，请点击确定重启应用后使用'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('确定'),
-                  onPressed: () {
-                    if (!widget.completer.isCompleted) {
-                      widget.completer.complete(true);
-                    }
-                    exit(0);
-                  },
-                ),
-              ],
-            );
-          },
-        );
+        if (!widget.completer.isCompleted) {
+          widget.completer.complete(true);
+        }
+
+        // 显示成功提示但不退出
+        BotToast.showText(text: '激活成功！API功能已刷新');
       } else {
         BotToast.showText(text: '激活失败');
         _startCooldown();
