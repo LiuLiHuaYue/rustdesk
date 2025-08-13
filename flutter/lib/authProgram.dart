@@ -12,7 +12,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:crypto/crypto.dart';
 
 
-const String serverAddress = "http://124.222.93.30";
+const String serverAddress = "http://124.222.93.30:20205";
 const String serverPublicKeyPem = '''
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiJVJhchPAmXMcgSqmdZy
