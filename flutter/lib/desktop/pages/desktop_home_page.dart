@@ -58,7 +58,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final isIncomingOnly = bind.isIncomingOnly();
+    final isIncomingOnly = true;
     return _buildBlock(
         child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +76,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget buildLeftPane(BuildContext context) {
-    final isIncomingOnly = bind.isIncomingOnly();
+    final isIncomingOnly = true;
     final isOutgoingOnly = bind.isOutgoingOnly();
     final children = <Widget>[
       if (!isOutgoingOnly) buildPresetPasswordWarning(),
@@ -163,11 +163,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       ),
                     ),
                     onTap: () => {
-                      if (DesktopSettingPage.tabKeys.isNotEmpty)
-                        {
-                          DesktopSettingPage.switch2page(
-                              DesktopSettingPage.tabKeys[0])
-                        }
+                      // if (DesktopSettingPage.tabKeys.isNotEmpty)
+                      //   {
+                      //     DesktopSettingPage.switch2page(
+                      //         DesktopSettingPage.tabKeys[0])
+                      //   }
                     },
                     onHover: (value) => _editHover.value = value,
                   ),
@@ -258,7 +258,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     RxBool hover = false.obs;
     return InkWell(
-      onTap: DesktopTabPage.onAddSetting,
+      //onTap: DesktopTabPage.onAddSetting,
       child: Tooltip(
         message: translate('Settings'),
         child: Obx(
@@ -358,7 +358,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                           ),
                           onHover: (value) => refreshHover.value = value,
                         ).marginOnly(right: 8, top: 4),
-                      if (!bind.isDisableSettings())
+                      if (!true)
                         InkWell(
                           child: Tooltip(
                             message: translate('Change Password'),
@@ -429,142 +429,142 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget buildHelpCards(String updateUrl) {
-    if (!bind.isCustomClient() &&
-        updateUrl.isNotEmpty &&
-        !isCardClosed &&
-        bind.mainUriPrefixSync().contains('rustdesk')) {
-      final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
-      String btnText = isToUpdate ? 'Click to update' : 'Click to download';
-      GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://rustdesk.com/download');
-        await launchUrl(url);
-      };
-      if (isToUpdate) {
-        onPressed = () {
-          handleUpdate(updateUrl);
-        };
-      }
-      return buildInstallCard(
-          "Status",
-          "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
-          btnText,
-          onPressed,
-          closeButton: true);
-    }
-    if (systemError.isNotEmpty) {
-      return buildInstallCard("", systemError, "", () {});
-    }
-
-    if (isWindows && !bind.isDisableInstallation()) {
-      if (!bind.mainIsInstalled()) {
-        return buildInstallCard(
-            "", bind.isOutgoingOnly() ? "" : "install_tip", "Install",
-            () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainGotoInstall();
-        });
-      } else if (bind.mainIsInstalledLowerVersion()) {
-        return buildInstallCard(
-            "Status", "Your installation is lower version.", "Click to upgrade",
-            () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainUpdateMe();
-        });
-      }
-    } else if (isMacOS) {
-      final isOutgoingOnly = bind.isOutgoingOnly();
-      if (!(isOutgoingOnly || bind.mainIsCanScreenRecording(prompt: false))) {
-        return buildInstallCard("Permissions", "config_screen", "Configure",
-            () async {
-          bind.mainIsCanScreenRecording(prompt: true);
-          watchIsCanScreenRecording = true;
-        }, help: 'Help', link: translate("doc_mac_permission"));
-      } else if (!isOutgoingOnly && !bind.mainIsProcessTrusted(prompt: false)) {
-        return buildInstallCard("Permissions", "config_acc", "Configure",
-            () async {
-          bind.mainIsProcessTrusted(prompt: true);
-          watchIsProcessTrust = true;
-        }, help: 'Help', link: translate("doc_mac_permission"));
-      } else if (!bind.mainIsCanInputMonitoring(prompt: false)) {
-        return buildInstallCard("Permissions", "config_input", "Configure",
-            () async {
-          bind.mainIsCanInputMonitoring(prompt: true);
-          watchIsInputMonitoring = true;
-        }, help: 'Help', link: translate("doc_mac_permission"));
-      } else if (!isOutgoingOnly &&
-          !svcStopped.value &&
-          bind.mainIsInstalled() &&
-          !bind.mainIsInstalledDaemon(prompt: false)) {
-        return buildInstallCard("", "install_daemon_tip", "Install", () async {
-          bind.mainIsInstalledDaemon(prompt: true);
-        });
-      }
-      //// Disable microphone configuration for macOS. We will request the permission when needed.
-      // else if ((await osxCanRecordAudio() !=
-      //     PermissionAuthorizeType.authorized)) {
-      //   return buildInstallCard("Permissions", "config_microphone", "Configure",
-      //       () async {
-      //     osxRequestAudio();
-      //     watchIsCanRecordAudio = true;
-      //   });
-      // }
-    } else if (isLinux) {
-      if (bind.isOutgoingOnly()) {
-        return Container();
-      }
-      final LinuxCards = <Widget>[];
-      if (bind.isSelinuxEnforcing()) {
-        // Check is SELinux enforcing, but show user a tip of is SELinux enabled for simple.
-        final keyShowSelinuxHelpTip = "show-selinux-help-tip";
-        if (bind.mainGetLocalOption(key: keyShowSelinuxHelpTip) != 'N') {
-          LinuxCards.add(buildInstallCard(
-            "Warning",
-            "selinux_tip",
-            "",
-            () async {},
-            marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Help',
-            link:
-                'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
-            closeButton: true,
-            closeOption: keyShowSelinuxHelpTip,
-          ));
-        }
-      }
-      if (bind.mainCurrentIsWayland()) {
-        LinuxCards.add(buildInstallCard(
-            "Warning", "wayland_experiment_tip", "", () async {},
-            marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Help',
-            link: 'https://rustdesk.com/docs/en/client/linux/#x11-required'));
-      } else if (bind.mainIsLoginWayland()) {
-        LinuxCards.add(buildInstallCard("Warning",
-            "Login screen using Wayland is not supported", "", () async {},
-            marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Help',
-            link: 'https://rustdesk.com/docs/en/client/linux/#login-screen'));
-      }
-      if (LinuxCards.isNotEmpty) {
-        return Column(
-          children: LinuxCards,
-        );
-      }
-    }
-    if (bind.isIncomingOnly()) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: OutlinedButton(
-          onPressed: () {
-            SystemNavigator.pop(); // Close the application
-            // https://github.com/flutter/flutter/issues/66631
-            if (isWindows) {
-              exit(0);
-            }
-          },
-          child: Text(translate('Quit')),
-        ),
-      ).marginAll(14);
-    }
+    // if (!bind.isCustomClient() &&
+    //     updateUrl.isNotEmpty &&
+    //     !isCardClosed &&
+    //     bind.mainUriPrefixSync().contains('rustdesk')) {
+    //   final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
+    //   String btnText = isToUpdate ? 'Click to update' : 'Click to download';
+    //   GestureTapCallback onPressed = () async {
+    //     final Uri url = Uri.parse('https://rustdesk.com/download');
+    //     await launchUrl(url);
+    //   };
+    //   if (isToUpdate) {
+    //     onPressed = () {
+    //       handleUpdate(updateUrl);
+    //     };
+    //   }
+    //   return buildInstallCard(
+    //       "Status",
+    //       "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
+    //       btnText,
+    //       onPressed,
+    //       closeButton: true);
+    // }
+    // if (systemError.isNotEmpty) {
+    //   return buildInstallCard("", systemError, "", () {});
+    // }
+    //
+    // if (isWindows && !bind.isDisableInstallation()) {
+    //   if (!bind.mainIsInstalled()) {
+    //     return buildInstallCard(
+    //         "", bind.isOutgoingOnly() ? "" : "install_tip", "Install",
+    //         () async {
+    //       await rustDeskWinManager.closeAllSubWindows();
+    //       bind.mainGotoInstall();
+    //     });
+    //   } else if (bind.mainIsInstalledLowerVersion()) {
+    //     return buildInstallCard(
+    //         "Status", "Your installation is lower version.", "Click to upgrade",
+    //         () async {
+    //       await rustDeskWinManager.closeAllSubWindows();
+    //       bind.mainUpdateMe();
+    //     });
+    //   }
+    // } else if (isMacOS) {
+    //   final isOutgoingOnly = bind.isOutgoingOnly();
+    //   if (!(isOutgoingOnly || bind.mainIsCanScreenRecording(prompt: false))) {
+    //     return buildInstallCard("Permissions", "config_screen", "Configure",
+    //         () async {
+    //       bind.mainIsCanScreenRecording(prompt: true);
+    //       watchIsCanScreenRecording = true;
+    //     }, help: 'Help', link: translate("doc_mac_permission"));
+    //   } else if (!isOutgoingOnly && !bind.mainIsProcessTrusted(prompt: false)) {
+    //     return buildInstallCard("Permissions", "config_acc", "Configure",
+    //         () async {
+    //       bind.mainIsProcessTrusted(prompt: true);
+    //       watchIsProcessTrust = true;
+    //     }, help: 'Help', link: translate("doc_mac_permission"));
+    //   } else if (!bind.mainIsCanInputMonitoring(prompt: false)) {
+    //     return buildInstallCard("Permissions", "config_input", "Configure",
+    //         () async {
+    //       bind.mainIsCanInputMonitoring(prompt: true);
+    //       watchIsInputMonitoring = true;
+    //     }, help: 'Help', link: translate("doc_mac_permission"));
+    //   } else if (!isOutgoingOnly &&
+    //       !svcStopped.value &&
+    //       bind.mainIsInstalled() &&
+    //       !bind.mainIsInstalledDaemon(prompt: false)) {
+    //     return buildInstallCard("", "install_daemon_tip", "Install", () async {
+    //       bind.mainIsInstalledDaemon(prompt: true);
+    //     });
+    //   }
+    //   //// Disable microphone configuration for macOS. We will request the permission when needed.
+    //   // else if ((await osxCanRecordAudio() !=
+    //   //     PermissionAuthorizeType.authorized)) {
+    //   //   return buildInstallCard("Permissions", "config_microphone", "Configure",
+    //   //       () async {
+    //   //     osxRequestAudio();
+    //   //     watchIsCanRecordAudio = true;
+    //   //   });
+    //   // }
+    // } else if (isLinux) {
+    //   if (bind.isOutgoingOnly()) {
+    //     return Container();
+    //   }
+    //   final LinuxCards = <Widget>[];
+    //   if (bind.isSelinuxEnforcing()) {
+    //     // Check is SELinux enforcing, but show user a tip of is SELinux enabled for simple.
+    //     final keyShowSelinuxHelpTip = "show-selinux-help-tip";
+    //     if (bind.mainGetLocalOption(key: keyShowSelinuxHelpTip) != 'N') {
+    //       LinuxCards.add(buildInstallCard(
+    //         "Warning",
+    //         "selinux_tip",
+    //         "",
+    //         () async {},
+    //         marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
+    //         help: 'Help',
+    //         link:
+    //             'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
+    //         closeButton: true,
+    //         closeOption: keyShowSelinuxHelpTip,
+    //       ));
+    //     }
+    //   }
+    //   if (bind.mainCurrentIsWayland()) {
+    //     LinuxCards.add(buildInstallCard(
+    //         "Warning", "wayland_experiment_tip", "", () async {},
+    //         marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
+    //         help: 'Help',
+    //         link: 'https://rustdesk.com/docs/en/client/linux/#x11-required'));
+    //   } else if (bind.mainIsLoginWayland()) {
+    //     LinuxCards.add(buildInstallCard("Warning",
+    //         "Login screen using Wayland is not supported", "", () async {},
+    //         marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
+    //         help: 'Help',
+    //         link: 'https://rustdesk.com/docs/en/client/linux/#login-screen'));
+    //   }
+    //   if (LinuxCards.isNotEmpty) {
+    //     return Column(
+    //       children: LinuxCards,
+    //     );
+    //   }
+    //}
+    // if (true) {
+    //   return Align(
+    //     alignment: Alignment.centerRight,
+    //     child: OutlinedButton(
+    //       onPressed: () {
+    //         SystemNavigator.pop(); // Close the application
+    //         // https://github.com/flutter/flutter/issues/66631
+    //         if (isWindows) {
+    //           exit(0);
+    //         }
+    //       },
+    //       child: Text(translate('Quit')),
+    //     ),
+    //   ).marginAll(14);
+    // }
     return Container();
   }
 
@@ -598,7 +598,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       children: [
         Container(
           margin: EdgeInsets.fromLTRB(
-              0, marginTop, 0, bind.isIncomingOnly() ? marginTop : 0),
+              0, marginTop, 0, true ? marginTop : 0),
           child: Container(
               decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -831,7 +831,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     });
     _uniLinksSubscription = listenUniLinks();
 
-    if (bind.isIncomingOnly()) {
+    if (true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _updateWindowSize();
       });
