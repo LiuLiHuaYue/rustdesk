@@ -56,6 +56,7 @@ Future<void> main(List<String> args) async {
     if (!reactivated) {
       exit(0);
     }
+  }
 
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
