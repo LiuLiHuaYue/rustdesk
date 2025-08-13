@@ -429,7 +429,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
               ),
 			  const SizedBox(height: 8),  //这部分
 			  const Text(
-                '激活请联系：123456',
+                '杜小白',
                 style: TextStyle(
                 fontSize: 16,
                 color: Colors.blue,
