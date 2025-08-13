@@ -22,7 +22,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
-
+import 'authProgram.dart';
 import 'common.dart';
 import 'consts.dart';
 import 'mobile/pages/home_page.dart';
@@ -41,6 +41,23 @@ Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
 
+
+  await initEnv(kAppTypeMain);
+  AuthService.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
+
+  final activated = await AuthService.verify();
+
+  if (!activated) {
+    await AuthService.showGlobalActivationDialog();
+
+    final reactivated = await AuthService.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
 
