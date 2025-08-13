@@ -362,6 +362,10 @@ class _ActivationDialogState extends State<ActivationDialog> {
                   child: const Text('确定'),
                   onPressed: () {
                     if (!widget.completer.isCompleted) {
+                      await gFFI.abModel.saveCache();
+                      await gFFI.groupModel.saveCache();
+                      await gFFI.serverModel.loadRecentConnections(),
+                      await draggablePositions.load(),
                       widget.completer.complete(true);
                     }
                     exit(0);
