@@ -40,12 +40,6 @@ late List<String> kBootArgs;
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
-  //await initEnv(kAppTypeMain);
-  AuthService.setCallbacks(
-    getOption: (key) => bind.mainGetOption(key: key),
-    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
-  );
-
   final activated = await AuthService.verify();
 
   if (!activated) {

@@ -10,7 +10,8 @@ import 'package:encrypt/encrypt.dart' as encrypt_lib;
 import 'package:bot_toast/bot_toast.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:crypto/crypto.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 const String serverAddress = "http://124.222.93.30:20205";
 const String serverPublicKeyPem = '''
@@ -114,24 +115,37 @@ Future<String> generateUniqueFeatureCode() async {
   return base64Url.encode(digest.bytes);
 }
 
-
 class AuthService {
-  static Future<String> Function(String key) getOptionCallback = (key) async =>
-  "";
-  static Future<void> Function(String key, String value) setOptionCallback =
-      (key, value) async {};
+  /// 保存 auth_key 到程序数据目录
+  static Future<void> saveAuthKey(String key) async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final file = File(path.join(dir.path, 'auth_key'));
+      await file.writeAsString(key);
+    } catch (e) {
+      print('保存 auth_key 失败: $e');
+      rethrow;
+    }
+  }
 
-  static void setCallbacks({
-    required Future<String> Function(String key) getOption,
-    required Future<void> Function(String key, String value) setOption,
-  }) {
-    getOptionCallback = getOption;
-    setOptionCallback = setOption;
+  /// 从程序数据目录读取 auth_key
+  static Future<String> loadAuthKey() async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final file = File(path.join(dir.path, 'auth_key'));
+      if (await file.exists()) {
+        return await file.readAsString();
+      }
+      return "";
+    } catch (e) {
+      print('读取 auth_key 失败: $e');
+      return "";
+    }
   }
 
   static Future<bool> showGlobalActivationDialog() async {
     final uid = (await generateUniqueFeatureCode()).trim();
-    final authKey = (await getOptionCallback('auth_key')).trim();
+    final authKey = (await loadAuthKey()).trim();
     final completer = Completer<bool>();
 
     WidgetsFlutterBinding.ensureInitialized();
@@ -163,7 +177,7 @@ class AuthService {
 
     try {
       uid = (await generateUniqueFeatureCode()).trim();
-      authKey = (await getOptionCallback('auth_key')).trim();
+      authKey = (await loadAuthKey()).trim();
       if (authKey.isEmpty) {
         return false;
       } else {
@@ -174,7 +188,6 @@ class AuthService {
       return false;
     }
   }
-
 
   static Future<bool> _checkActivation(String uid, String key) async {
     try {
@@ -273,7 +286,6 @@ class AuthService {
   }
 }
 
-
 class ActivationDialog extends StatefulWidget {
   final String uid;
   final String authKey;
@@ -340,7 +352,8 @@ class _ActivationDialogState extends State<ActivationDialog> {
       );
 
       if (success) {
-        await AuthService.setOptionCallback('auth_key', _controller.text);
+        // 直接保存 auth_key
+        await AuthService.saveAuthKey(_controller.text);
 
         if (mounted) {
           setState(() => _isLoading = false);
@@ -427,14 +440,14 @@ class _ActivationDialogState extends State<ActivationDialog> {
                 ),
                 style: const TextStyle(fontSize: 18),
               ),
-			  const SizedBox(height: 8),  //这部分
-			  const Text(
+              const SizedBox(height: 8),
+              const Text(
                 '杜小白',
                 style: TextStyle(
-                fontSize: 16,
-                color: Colors.blue,
+                  fontSize: 16,
+                  color: Colors.blue,
                 ),
-              ),  //这部分
+              ),
               const SizedBox(height: 16),
               if (_cooldownActive)
                 Text(
