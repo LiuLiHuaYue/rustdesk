@@ -40,49 +40,22 @@ late List<String> kBootArgs;
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
+  //await initEnv(kAppTypeMain);
+  AuthService.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
 
-  await initEnv(kAppTypeMain);
+  final activated = await AuthService.verify();
 
-  // 在 initEnv 之后添加激活验证
-  bool activationRequired = true; // 默认为需要激活
+  if (!activated) {
+    await AuthService.showGlobalActivationDialog();
 
-  try {
-    // 检查是否已激活
-    final activated = await AuthService.verify();
-    if (!activated) {
-      // 显示激活对话框
-      final success = await AuthService.showGlobalActivationDialog();
-      if (!success) {
-        exit(0); // 用户取消激活或激活失败
-      }
-
-      // 再次验证激活状态
-      final reactivated = await AuthService.verify();
-      if (!reactivated) {
-        exit(0); // 激活后验证失败
-      }
+    final reactivated = await AuthService.verify();
+    if (!reactivated) {
+      exit(0);
     }
-    activationRequired = false; // 标记为不需要激活
-  } catch (e) {
-    debugPrint("Activation error: $e");
-    // 即使激活出错也继续运行，但标记为需要激活
   }
-
-  // 如果激活状态发生变化，重新初始化API相关服务
-  if (!activationRequired) {
-    debugPrint("Reinitializing API services after activation");
-    if (isDesktop && desktopType == DesktopType.main) {
-      // 重新启动服务
-      gFFI.serverModel.startService();
-      bind.pluginSyncUi(syncTo: kAppTypeMain);
-      bind.pluginListReload();
-    }
-
-    // 重新加载缓存
-    await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
-    gFFI.userModel.refreshCurrentUser();
-  }
-
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
 
