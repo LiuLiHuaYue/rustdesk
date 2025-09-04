@@ -37,14 +37,14 @@
       "name": "rustdesk",
       "buildsystem": "simple",
       "build-commands": [
-        "bsdtar -Oxf rustdesk.deb data.tar.xz | bsdtar -xf -",
+        "bsdtar -Oxf GuLingTong.deb data.tar.xz | bsdtar -xf -",
         "cp -r usr/* /app/",
         "mkdir -p /app/bin && ln -s /app/share/rustdesk/rustdesk /app/bin/rustdesk"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "rustdesk.deb"
+          "path": "GuLingTong.deb"
         },
         {
           "type": "file",

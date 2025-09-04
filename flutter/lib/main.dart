@@ -145,6 +145,8 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  await bind.mainSetOption(key: "lang", value: "zh-cn");
+  await bind.mainSetOption(key: "theme", value: "dark");
   runApp(App());
 
   // Set window option.
@@ -179,6 +181,8 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  await bind.mainSetOption(key: "lang", value: "zh-cn");
+  await bind.mainSetOption(key: "theme", value: "dark");
   runApp(App());
   await initUniLinks();
 }

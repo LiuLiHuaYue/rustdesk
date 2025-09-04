@@ -97,11 +97,11 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
             body: DesktopTab(
               controller: tabController,
               tail: Offstage(
-                offstage: bind.isIncomingOnly() || bind.isDisableSettings(),
+                offstage: bind.isIncomingOnly() || true,
                 child: ActionIcon(
                   message: 'Settings',
                   icon: IconFont.menu,
-                  onTap: DesktopTabPage.onAddSetting,
+                  //onTap: DesktopTabPage.onAddSetting,
                   isClose: false,
                 ),
               ),

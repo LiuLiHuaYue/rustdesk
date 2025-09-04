@@ -29,7 +29,7 @@ class SettingsPage extends StatefulWidget implements PageShape {
   final icon = Icon(Icons.settings);
 
   @override
-  final appBarActions = bind.isDisableSettings() ? [] : [ScanButton()];
+  final appBarActions = true ? [] : [ScanButton()];
 
   @override
   State<SettingsPage> createState() => _SettingsState();
@@ -636,7 +636,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             },
     ));
 
-    final disabledSettings = bind.isDisableSettings();
+    final disabledSettings = true;
     final hideSecuritySettings =
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) == 'Y';
     final settings = SettingsList(
@@ -970,7 +970,7 @@ void showThemeSettings(OverlayDialogManager dialogManager) async {
 void showAbout(OverlayDialogManager dialogManager) {
   dialogManager.show((setState, close, context) {
     return CustomAlertDialog(
-      title: Text(translate('About RustDesk')),
+      title: Text(translate('About GuLingTong')),
       content: Wrap(direction: Axis.vertical, spacing: 12, children: [
         Text('Version: $version'),
         InkWell(

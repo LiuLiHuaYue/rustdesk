@@ -258,7 +258,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     RxBool hover = false.obs;
     return InkWell(
-      onTap: DesktopTabPage.onAddSetting,
+      //onTap: DesktopTabPage.onAddSetting,
       child: Tooltip(
         message: translate('Settings'),
         child: Obx(
@@ -358,7 +358,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                           ),
                           onHover: (value) => refreshHover.value = value,
                         ).marginOnly(right: 8, top: 4),
-                      if (!bind.isDisableSettings())
+                      if (!true)
                         InkWell(
                           child: Tooltip(
                             message: translate('Change Password'),

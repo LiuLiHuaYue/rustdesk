@@ -595,35 +595,6 @@ class _PrivilegeBoard extends StatefulWidget {
 
 class _PrivilegeBoardState extends State<_PrivilegeBoard> {
   late final client = widget.client;
-  Widget buildPermissionIcon(bool enabled, IconData iconData,
-      Function(bool)? onTap, String tooltipText) {
-    return Tooltip(
-      message: "$tooltipText: ${enabled ? "ON" : "OFF"}",
-      waitDuration: Duration.zero,
-      child: Container(
-        decoration: BoxDecoration(
-          color: enabled ? MyTheme.accent : Colors.grey[700],
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        padding: EdgeInsets.all(8.0),
-        child: InkWell(
-          onTap: () =>
-              checkClickTime(widget.client.id, () => onTap?.call(!enabled)),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: Icon(
-                  iconData,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -650,149 +621,29 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            translate("Permissions"),
+            "用户须知：",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ).marginOnly(left: 4.0, bottom: 8.0),
           Expanded(
-            child: GridView.count(
-              crossAxisCount: crossAxisCount,
+            child: ListView(
               padding: EdgeInsets.symmetric(horizontal: spacing),
-              mainAxisSpacing: spacing,
-              crossAxisSpacing: spacing,
-              children: client.type_() == ClientType.camera
-                  ? [
-                      buildPermissionIcon(
-                        client.audio,
-                        Icons.volume_up_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "audio",
-                              enabled: enabled);
-                          setState(() {
-                            client.audio = enabled;
-                          });
-                        },
-                        translate('Enable audio'),
-                      ),
-                      buildPermissionIcon(
-                        client.recording,
-                        Icons.videocam_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "recording",
-                              enabled: enabled);
-                          setState(() {
-                            client.recording = enabled;
-                          });
-                        },
-                        translate('Enable recording session'),
-                      ),
-                    ]
-                  : [
-                      buildPermissionIcon(
-                        client.keyboard,
-                        Icons.keyboard,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "keyboard",
-                              enabled: enabled);
-                          setState(() {
-                            client.keyboard = enabled;
-                          });
-                        },
-                        translate('Enable keyboard/mouse'),
-                      ),
-                      buildPermissionIcon(
-                        client.clipboard,
-                        Icons.assignment_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "clipboard",
-                              enabled: enabled);
-                          setState(() {
-                            client.clipboard = enabled;
-                          });
-                        },
-                        translate('Enable clipboard'),
-                      ),
-                      buildPermissionIcon(
-                        client.audio,
-                        Icons.volume_up_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "audio",
-                              enabled: enabled);
-                          setState(() {
-                            client.audio = enabled;
-                          });
-                        },
-                        translate('Enable audio'),
-                      ),
-                      buildPermissionIcon(
-                        client.file,
-                        Icons.upload_file_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "file",
-                              enabled: enabled);
-                          setState(() {
-                            client.file = enabled;
-                          });
-                        },
-                        translate('Enable file copy and paste'),
-                      ),
-                      buildPermissionIcon(
-                        client.restart,
-                        Icons.restart_alt_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "restart",
-                              enabled: enabled);
-                          setState(() {
-                            client.restart = enabled;
-                          });
-                        },
-                        translate('Enable remote restart'),
-                      ),
-                      buildPermissionIcon(
-                        client.recording,
-                        Icons.videocam_rounded,
-                        (enabled) {
-                          bind.cmSwitchPermission(
-                              connId: client.id,
-                              name: "recording",
-                              enabled: enabled);
-                          setState(() {
-                            client.recording = enabled;
-                          });
-                        },
-                        translate('Enable recording session'),
-                      ),
-                      // only windows support block input
-                      if (isWindows)
-                        buildPermissionIcon(
-                          client.blockInput,
-                          Icons.block,
-                          (enabled) {
-                            bind.cmSwitchPermission(
-                                connId: client.id,
-                                name: "block_input",
-                                enabled: enabled);
-                            setState(() {
-                              client.blockInput = enabled;
-                            });
-                          },
-                          translate('Enable blocking user input'),
-                        )
-                    ],
+              children: [
+                Text(
+                  "1、远程教学功能仅限用于解决古灵通软件用户在使用软件过程中出现功能问题或功能疑问答疑为用途，属于软件用户的正常售后服务。",
+                  style: TextStyle(fontSize: 12),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "2、远程教学接受后，我司服务人员将会在本次服务时长内，具有对对应的同意授权的古灵通软件用户PC端具有控制权限。",
+                  style: TextStyle(fontSize: 12),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "3、远程协助过程中，我司服务人员/技术人员不会对你的PC端除了古灵通软件以外其他软件进行操作。",
+                  style: TextStyle(fontSize: 12),
+                ),
+              ],
             ),
           ),
         ],
@@ -800,6 +651,7 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
     );
   }
 }
+
 
 const double buttonBottomMargin = 8;
 
