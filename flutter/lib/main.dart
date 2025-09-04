@@ -145,6 +145,8 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  await bind.mainSetLocalOption(key: 'theme', value: 'dark');
+  await bind.mainSetLocalOption(key: 'lang', value: 'zh-cn');
   runApp(App());
 
   // Set window option.
@@ -167,7 +169,7 @@ void runMainApp(bool startService) async {
     windowManager.setOpacity(1);
     windowManager.setTitle(getWindowName());
     // Do not use `windowManager.setResizable()` here.
-    setResizable(!bind.isIncomingOnly());
+    setResizable(!true);
   });
 }
 
@@ -179,6 +181,8 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  await bind.mainSetLocalOption(key: 'theme', value: 'dark');
+  await bind.mainSetLocalOption(key: 'lang', value: 'zh-cn');
   runApp(App());
   await initUniLinks();
 }

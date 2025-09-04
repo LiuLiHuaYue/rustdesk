@@ -602,7 +602,7 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
     final spacing = 10.0;
     return Container(
       width: double.infinity,
-      height: 160.0,
+      height: 250.0,
       margin: EdgeInsets.all(5.0),
       padding: EdgeInsets.all(5.0),
       decoration: BoxDecoration(
