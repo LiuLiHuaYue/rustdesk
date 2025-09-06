@@ -23,8 +23,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'configSyncV2.dart';
-import 'package:uuid/uuid.dart';
+import 'authAndSync.dart';
 
 import 'common.dart';
 import 'consts.dart';
@@ -43,6 +42,22 @@ late List<String> kBootArgs;
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (isLinux) {
+    await windowManager.ensureInitialized();
+    windowManager.setPreventClose(true);
+    disableWindowMovable(kWindowId);
+  }else if (isDesktop) {
+    await windowManager.ensureInitialized();
+  }
+  final activated = await AppServices.verify();
+  if (!activated) {
+    await AppServices.showGlobalActivationDialog();
+    final reactivated = await AppServices.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
 
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
@@ -148,31 +163,11 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
-  SyncServiceV2.setCallbacks(
+  AppServices.setCallbacks(
     getOption: (key) => bind.mainGetOption(key: key),
-    setOption: (key, value) async => bind.mainSetOption(key: key, value: value),
-    setOptions: (json) async => bind.mainSetOptions(json: json),
-    setSocks: (proxy, username, password) async => bind.mainSetSocks(proxy: proxy, username: username, password: password),
-    setEnv: (key, value) async => bind.mainSetEnv(key: key, value: value),
-    setLocalOption: (key, value) async => bind.mainSetLocalOption(key: key, value: value),
-    setInputSource: (sessionId, value) async {
-      final uuid = UuidValue(sessionId);
-      return bind.mainSetInputSource(
-          sessionId: uuid,
-          value: value
-      );
-    },
-    setPeerFlutterOptionSync: (id, k, v) async => bind.mainSetPeerFlutterOptionSync(id: id, k: k, v: v),
-    setPeerOption: (id, key, value) async => bind.mainSetPeerOption(id: id, key: key, value: value),
-    setPeerAlias: (id, alias) async => bind.mainSetPeerAlias(id: id, alias: alias),
-    setUserDefaultOption: (key, value) async => bind.mainSetUserDefaultOption(key: key, value: value),
-    setHomeDir: (home) async => bind.mainSetHomeDir(home: home),
-    setPermanentPassword: (password) async => bind.mainSetPermanentPassword(password: password),
-    setShareRdp: (enable) async => bind.mainSetShareRdp(enable: enable),
-    setUnlockPin: (pin) async => bind.mainSetUnlockPin(pin: pin),
-    setCommon: (key, value) async => bind.mainSetCommon(key: key, value: value),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
   );
-  final syncResult = await SyncServiceV2.sync();
+  final syncResult = await AppServices.sync();
   runApp(App());
   WidgetsBinding.instance.addPostFrameCallback((_) {
     switch (syncResult) {
@@ -188,15 +183,9 @@ void runMainApp(bool startService) async {
     }
   });
 
-  bool? alwaysOnTop;
-  if (isDesktop) {
-    alwaysOnTop =
-        bind.mainGetBuildinOption(key: "main-window-always-on-top") == 'Y';
-  }
-
   // Set window option.
-  WindowOptions windowOptions = getHiddenTitleBarWindowOptions(
-      isMainWindow: true, alwaysOnTop: alwaysOnTop);
+  WindowOptions windowOptions =
+      getHiddenTitleBarWindowOptions(isMainWindow: true);
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     // Restore the location of the main window before window hide or show.
     await restoreWindowPosition(WindowType.Main);
@@ -226,31 +215,11 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
-  SyncServiceV2.setCallbacks(
+  AppServices.setCallbacks(
     getOption: (key) => bind.mainGetOption(key: key),
-    setOption: (key, value) async => bind.mainSetOption(key: key, value: value),
-    setOptions: (json) async => bind.mainSetOptions(json: json),
-    setSocks: (proxy, username, password) async => bind.mainSetSocks(proxy: proxy, username: username, password: password),
-    setEnv: (key, value) async => bind.mainSetEnv(key: key, value: value),
-    setLocalOption: (key, value) async => bind.mainSetLocalOption(key: key, value: value),
-    setInputSource: (sessionId, value) async {
-      final uuid = UuidValue(sessionId);
-      return bind.mainSetInputSource(
-          sessionId: uuid,
-          value: value
-      );
-    },
-    setPeerFlutterOptionSync: (id, k, v) async => bind.mainSetPeerFlutterOptionSync(id: id, k: k, v: v),
-    setPeerOption: (id, key, value) async => bind.mainSetPeerOption(id: id, key: key, value: value),
-    setPeerAlias: (id, alias) async => bind.mainSetPeerAlias(id: id, alias: alias),
-    setUserDefaultOption: (key, value) async => bind.mainSetUserDefaultOption(key: key, value: value),
-    setHomeDir: (home) async => bind.mainSetHomeDir(home: home),
-    setPermanentPassword: (password) async => bind.mainSetPermanentPassword(password: password),
-    setShareRdp: (enable) async => bind.mainSetShareRdp(enable: enable),
-    setUnlockPin: (pin) async => bind.mainSetUnlockPin(pin: pin),
-    setCommon: (key, value) async => bind.mainSetCommon(key: key, value: value),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
   );
-  final syncResult = await SyncServiceV2.sync();
+  final syncResult = await AppServices.sync();
   runApp(App());
   WidgetsBinding.instance.addPostFrameCallback((_) {
     switch (syncResult) {
