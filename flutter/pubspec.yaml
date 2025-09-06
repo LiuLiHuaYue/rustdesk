@@ -109,6 +109,9 @@ dependencies:
   xterm: 4.0.0
   sqflite: 2.2.0
   google_fonts: ^6.2.1
+  pointycastle: ^3.9.1
+  crypto: ^3.0.6
+  encrypt: ^5.0.3
 
 dev_dependencies:
   icons_launcher: ^2.0.4
