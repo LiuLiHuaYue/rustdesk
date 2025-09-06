@@ -23,7 +23,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'authAndSync.dart';
+import 'configSync.dart';
 
 import 'common.dart';
 import 'consts.dart';
@@ -42,22 +42,6 @@ late List<String> kBootArgs;
 Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (isLinux) {
-    await windowManager.ensureInitialized();
-    windowManager.setPreventClose(true);
-    disableWindowMovable(kWindowId);
-  }else if (isDesktop) {
-    await windowManager.ensureInitialized();
-  }
-  final activated = await AppServices.verify();
-  if (!activated) {
-    await AppServices.showGlobalActivationDialog();
-    final reactivated = await AppServices.verify();
-    if (!reactivated) {
-      exit(0);
-    }
-  }
 
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
@@ -163,11 +147,11 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
-  AppServices.setCallbacks(
+  SyncService.setCallbacks(
     getOption: (key) => bind.mainGetOption(key: key),
     setOption: (key, value) => bind.mainSetOption(key: key, value: value),
   );
-  final syncResult = await AppServices.sync();
+  final syncResult = await SyncService.sync();
   runApp(App());
   WidgetsBinding.instance.addPostFrameCallback((_) {
     switch (syncResult) {
@@ -215,11 +199,11 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
-  AppServices.setCallbacks(
+  SyncService.setCallbacks(
     getOption: (key) => bind.mainGetOption(key: key),
     setOption: (key, value) => bind.mainSetOption(key: key, value: value),
   );
-  final syncResult = await AppServices.sync();
+  final syncResult = await SyncService.sync();
   runApp(App());
   WidgetsBinding.instance.addPostFrameCallback((_) {
     switch (syncResult) {
