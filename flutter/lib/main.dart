@@ -23,6 +23,8 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'authProgram.dart';
+
 import 'common.dart';
 import 'consts.dart';
 import 'mobile/pages/home_page.dart';
@@ -145,6 +147,14 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  final activated = await AuthService.verify();
+  if (!activated) {
+    await AuthService.showGlobalActivationDialog();
+    final reactivated = await AuthService.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   runApp(App());
 
   // Set window option.
@@ -179,6 +189,14 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  final activated = await AuthService.verify();
+  if (!activated) {
+    await AuthService.showGlobalActivationDialog();
+    final reactivated = await AuthService.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   runApp(App());
   await initUniLinks();
 }
