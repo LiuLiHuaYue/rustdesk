@@ -540,7 +540,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
               ),
               const SizedBox(height: 8),
               const Text(
-                '闲鱼@琉璃瑄瑾丶',
+                '激活请联系微信：zuhao2828',
                 style: TextStyle(fontSize: 16, color: Colors.blue),
               ),
               const SizedBox(height: 16),
