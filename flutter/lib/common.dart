@@ -1701,7 +1701,7 @@ String get windowFramePrefix =>
     kWindowPrefix +
     (bind.isIncomingOnly()
         ? "incoming_"
-        : (bind.isOutgoingOnly() ? "outgoing_" : ""));
+        : (true ? "outgoing_" : ""));
 
 /// Save window position and size on exit
 /// Note that windowId must be provided if it's subwindow
@@ -1990,11 +1990,11 @@ Future<bool> restoreWindowPosition(WindowType type,
       }
       if (lpos.isMaximized == true) {
         await restorePos();
-        if (!(bind.isIncomingOnly() || bind.isOutgoingOnly())) {
+        if (!(bind.isIncomingOnly() || true)) {
           await windowManager.maximize();
         }
       } else {
-        final storeSize = !bind.isIncomingOnly() || bind.isOutgoingOnly();
+        final storeSize = !bind.isIncomingOnly() || true;
         if (isWindows) {
           if (storeSize) {
             // We need to set the window size first to avoid the incorrect size in some special cases.

@@ -65,7 +65,7 @@ class DesktopSettingPage extends StatefulWidget {
   static final List<SettingsTabKey> tabKeys = [
     SettingsTabKey.general,
     if (!isWeb &&
-        !bind.isOutgoingOnly() &&
+        !true &&
         !bind.isDisableSettings() &&
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) != 'Y')
       SettingsTabKey.safety,
@@ -453,7 +453,7 @@ class _GeneralState extends State<_General> {
   }
 
   Widget service() {
-    if (bind.isOutgoingOnly()) {
+    if (true) {
       return const Offstage();
     }
 
@@ -534,7 +534,7 @@ class _GeneralState extends State<_General> {
             kOptionAllowAutoUpdate,
             isServer: true,
           ),
-        if (isWindows && !bind.isOutgoingOnly())
+        if (isWindows && !true)
           _OptionCheckBox(
             context,
             'Capture screen using DirectX',
@@ -564,7 +564,7 @@ class _GeneralState extends State<_General> {
   }
 
   Widget wallpaper() {
-    if (bind.isOutgoingOnly()) {
+    if (true) {
       return const Offstage();
     }
 
@@ -623,7 +623,7 @@ class _GeneralState extends State<_General> {
   }
 
   Widget audio(BuildContext context) {
-    if (bind.isOutgoingOnly()) {
+    if (true) {
       return const Offstage();
     }
 
@@ -665,14 +665,14 @@ class _GeneralState extends State<_General> {
       bool root_dir_exists = map['root_dir_exists']!;
       bool user_dir_exists = map['user_dir_exists']!;
       return _Card(title: 'Recording', children: [
-        if (!bind.isOutgoingOnly())
+        if (!true)
           _OptionCheckBox(context, 'Automatically record incoming sessions',
               kOptionAllowAutoRecordIncoming),
         if (!bind.isIncomingOnly())
           _OptionCheckBox(context, 'Automatically record outgoing sessions',
               kOptionAllowAutoRecordOutgoing,
               isServer: false),
-        if (showRootDir && !bind.isOutgoingOnly())
+        if (showRootDir && !true)
           Row(
             children: [
               Text(
@@ -697,7 +697,7 @@ class _GeneralState extends State<_General> {
           Row(
             children: [
               Text(
-                  '${translate((showRootDir && !bind.isOutgoingOnly()) ? "Outgoing" : "Directory")}:'),
+                  '${translate((showRootDir && !true) ? "Outgoing" : "Directory")}:'),
               Expanded(
                 child: GestureDetector(
                     onTap: user_dir_exists
