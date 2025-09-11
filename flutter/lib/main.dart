@@ -147,6 +147,10 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  AuthService.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
   final activated = await AuthService.verify();
   if (!activated) {
     await AuthService.showGlobalActivationDialog();
@@ -189,6 +193,10 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  AuthService.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
   final activated = await AuthService.verify();
   if (!activated) {
     await AuthService.showGlobalActivationDialog();

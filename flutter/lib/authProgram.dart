@@ -116,9 +116,13 @@ Future<String> generateUniqueFeatureCode() async {
 }
 
 class AuthService {
-  static int _currentHeartbeatRate = 300;
+  static Future<String> Function(String key) getOptionCallback = (key) async =>
+      "";
+  static Future<void> Function(String key, String value) setOptionCallback =
+      (key, value) async {};
   static Timer? _heartbeatTimer;
   static bool _heartbeatStarted = false;
+  static int _currentHeartbeatRate = 300;
 
   static void startHeartbeat(int heartbeatRate) {
     if (_heartbeatStarted && _currentHeartbeatRate == heartbeatRate) {
@@ -140,12 +144,18 @@ class AuthService {
       }
     });
   }
+  
+  static void setCallbacks({
+    required Future<String> Function(String key) getOption,
+    required Future<void> Function(String key, String value) setOption,
+  }) {
+    getOptionCallback = getOption;
+    setOptionCallback = setOption;
+  }
 
   static Future<void> saveAuthKey(String key) async {
     try {
-      final dir = await getApplicationSupportDirectory();
-      final file = File(path.join(dir.path, 'auth_key'));
-      await file.writeAsString(key);
+      await setOptionCallback('authKey', key);
     } catch (e) {
       rethrow;
     }
@@ -153,12 +163,7 @@ class AuthService {
 
   static Future<String> loadAuthKey() async {
     try {
-      final dir = await getApplicationSupportDirectory();
-      final file = File(path.join(dir.path, 'auth_key'));
-      if (await file.exists()) {
-        return await file.readAsString();
-      }
-      return "";
+      return await getOptionCallback('authKey') ?? "";
     } catch (e) {
       return "";
     }
@@ -535,7 +540,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
               ),
               const SizedBox(height: 8),
               const Text(
-                '激活联系微信：zuhao2828',
+                '闲鱼@琉璃瑄瑾丶',
                 style: TextStyle(fontSize: 16, color: Colors.blue),
               ),
               const SizedBox(height: 16),
