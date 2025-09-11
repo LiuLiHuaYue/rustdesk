@@ -13,16 +13,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:window_manager/window_manager.dart';
 
-const String serverAddress = "http://192.168.0.105:20205";
+const String serverAddress = "http://www.fcpx0.cn:20205";
 const String serverPublicKeyPem = '''
 -----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjZWplOJAIpmQh6v6/I6w
-G6Oe6VrFIDB3fuOlU6zxZSQ7MVHInENKhWMiEJg7UYRIAuHtKxZ/YkMUkwYkUO5T
-2TA7QgIoW4YNly7qthqkB9IiUV7D12tTV6eaMwIrPfwokXUsDRimm0WtimGOEjlE
-nWO4C8F8f/tkyRs7yK8s84Qdg7sd5+EuFsff0Eypfxe39rjpl6P5pFfhnejp7aUl
-E075YcMZQuVKinrlgswkgd2ZvnbZ8cY8vmyQpZbPdrJyWSj+KieC+bPO3PShf/Fs
-qHP3vURbCVL9lCTAoSKmqyWKcid5uNLlUnjtZw3u/MbVY/IE1O5jS6zUa5hAVDsS
-3QIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhAPsNtnVHjWQ7TvqQvON
+JIeS7oCF8g0k5H5dkzBhXatNXehiMYH532Uhdjog0Tnl7nl9GnNME9V1OETUNLk5
+SuesfP9qVKHfCITGWdjMIfJ2ku/LaMysmCAwBw5aFGXT2A2HD21oRn1nUS15Jr+G
+R2DBKq2+/RRuq2csT48vuI+vRJ3jYHjjJEcv7X49nsUdLzXL7AayiPZaLNh4jCp/
+X/h8QLydIlDX9SgPHosx/e/yNBwI9oa4ZdKOofWL0OTiPoHqVTU7ETq48cus2h1F
+wtUahpfvXtDjVjT8o8pWfxWXl1Cf3XhwBnMYQg1jxQR9wK7AtTIDDVfsO4GqZMGi
+OQIDAQAB
 -----END PUBLIC KEY-----
 ''';
 
@@ -535,7 +535,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
               ),
               const SizedBox(height: 8),
               const Text(
-                '闲鱼@琉璃瑄瑾丶',
+                '激活联系微信：zuhao2828',
                 style: TextStyle(fontSize: 16, color: Colors.blue),
               ),
               const SizedBox(height: 16),
