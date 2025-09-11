@@ -2,7 +2,7 @@
 version: 1
 script:
  - rm -rf ./AppDir || true
- - bsdtar -zxvf rustdesk.deb
+ - bsdtar -zxvf HyDeskPro.deb
  - tar -xvf ./data.tar.xz
  - mkdir ./AppDir
  - mv ./usr ./AppDir/usr
@@ -15,8 +15,8 @@ script:
 AppDir:
   path: ./AppDir
   app_info:
-    id: rustdesk
-    name: rustdesk
+    id: HyDeskPro
+    name: HyDeskPro
     icon: rustdesk
     version: 1.4.1
     exec: usr/share/rustdesk/rustdesk
