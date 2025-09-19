@@ -13,16 +13,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:window_manager/window_manager.dart';
 
-const String serverAddress = "http://www.fcpx0.cn:20205";
+const String serverAddress = "http://47.101.69.238:20205";
 const String serverPublicKeyPem = '''
 -----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhAPsNtnVHjWQ7TvqQvON
-JIeS7oCF8g0k5H5dkzBhXatNXehiMYH532Uhdjog0Tnl7nl9GnNME9V1OETUNLk5
-SuesfP9qVKHfCITGWdjMIfJ2ku/LaMysmCAwBw5aFGXT2A2HD21oRn1nUS15Jr+G
-R2DBKq2+/RRuq2csT48vuI+vRJ3jYHjjJEcv7X49nsUdLzXL7AayiPZaLNh4jCp/
-X/h8QLydIlDX9SgPHosx/e/yNBwI9oa4ZdKOofWL0OTiPoHqVTU7ETq48cus2h1F
-wtUahpfvXtDjVjT8o8pWfxWXl1Cf3XhwBnMYQg1jxQR9wK7AtTIDDVfsO4GqZMGi
-OQIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzct5SnbTJaRT6zcaOchK
++BXIcCV2EPsCH1On5mFRHrqhJRn8ZVPdxT6DcIabhj9T6jM7berYreZn+g7dQdw4
+yxumyyGyB5Nt76xMMP3Xdd6/v9Z+yfQ5LXKN11uGShEUXzQTqhT/6SOfQXJxaZKS
+MU9PtDmddbSGpCKjxNdhduV9Aak7sEzjrwR/SrwqxXbpkcKRrWipMMeG9m47t3lD
+cA6zIZuUAFsOK6CdPyjT8qk6w0HPhmzcMfnPHjKqq9PBqSC7ViqxhmCvsEBdFff/
+utu3qA6XH/TXCIGWjMi/LDO0/iCFru5DLw28q54kVZzdaPQx2inDuwQnK35ERuzV
+PQIDAQAB
 -----END PUBLIC KEY-----
 ''';
 
@@ -115,7 +115,7 @@ Future<String> generateUniqueFeatureCode() async {
   return base64Url.encode(digest.bytes);
 }
 
-class AuthService {
+class AuthServiceV2 {
   static Future<String> Function(String key) getOptionCallback = (key) async =>
       "";
   static Future<void> Function(String key, String value) setOptionCallback =
@@ -252,7 +252,7 @@ class AuthService {
 
   static Future<List<dynamic>> _checkActivation(String uid, String key) async {
     try {
-      final result = await _sendAuthRequest('checkAuth', uid, key);
+      final result = await _sendAuthRequest('checkAuthV2', uid, key);
       return [result[0], result[1]];
     } catch (e) {
       return [false, 300];
@@ -442,8 +442,8 @@ class _ActivationDialogState extends State<ActivationDialog> {
     BotToast.showLoading();
 
     try {
-      final result = await AuthService._sendAuthRequest(
-        'registerAuth',
+      final result = await AuthServiceV2._sendAuthRequest(
+        'registerAuthV2',
         widget.uid,
         activationKey,
       );
@@ -451,7 +451,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
       final success = result[0];
 
       if (success) {
-        await AuthService.saveAuthKey(activationKey);
+        await AuthServiceV2.saveAuthKey(activationKey);
 
         if (mounted) {
           setState(() => _isLoading = false);
@@ -540,7 +540,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
               ),
               const SizedBox(height: 8),
               const Text(
-                '激活请联系微信：zuhao2828',
+                '闲鱼@琉璃瑄瑾丶',
                 style: TextStyle(fontSize: 16, color: Colors.blue),
               ),
               const SizedBox(height: 16),
