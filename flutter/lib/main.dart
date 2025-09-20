@@ -22,7 +22,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
-import 'authProgram.dart';
+
+import 'authProgramV2.dart';
+
 import 'common.dart';
 import 'consts.dart';
 import 'mobile/pages/home_page.dart';
@@ -41,23 +43,6 @@ Future<void> main(List<String> args) async {
   earlyAssert();
   WidgetsFlutterBinding.ensureInitialized();
 
-
-  await initEnv(kAppTypeMain);
-  AuthService.setCallbacks(
-    getOption: (key) => bind.mainGetOption(key: key),
-    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
-  );
-
-  final activated = await AuthService.verify();
-
-  if (!activated) {
-    await AuthService.showGlobalActivationDialog();
-
-    final reactivated = await AuthService.verify();
-    if (!reactivated) {
-      exit(0);
-    }
-  }
   debugPrint("launch args: $args");
   kBootArgs = List.from(args);
 
@@ -162,6 +147,18 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  AuthServiceV2.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
+  final activated = await AuthServiceV2.verify();
+  if (!activated) {
+    await AuthServiceV2.showGlobalActivationDialog();
+    final reactivated = await AuthServiceV2.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   runApp(App());
 
   // Set window option.
@@ -196,6 +193,18 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  AuthServiceV2.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
+  final activated = await AuthServiceV2.verify();
+  if (!activated) {
+    await AuthServiceV2.showGlobalActivationDialog();
+    final reactivated = await AuthServiceV2.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   runApp(App());
   await initUniLinks();
 }

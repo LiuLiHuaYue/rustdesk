@@ -1,4 +1,3 @@
-// activation_service.dart
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -10,20 +9,23 @@ import 'package:encrypt/encrypt.dart' as encrypt_lib;
 import 'package:bot_toast/bot_toast.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:crypto/crypto.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:window_manager/window_manager.dart';
 
 const String serverAddress = "http://124.222.93.30:20205";
 const String serverPublicKeyPem = '''
 -----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiJVJhchPAmXMcgSqmdZy
-51V9ducZDd8AA1oa6NiBgcaW5kgpEiZNr8bkArBMjDOaCDOp/NYDt3Xu9zNSPTvn
-S+NEXYX6Wz9l/lZRRnnyekiyzi/ZhGiSP1hjIsJB8nP7WZccxYBVZF5qqX14u4ne
-WCyro6KTq14pTv1IhyL4sOjVV6AI23+Zl9zzUEmE+szyLLHA/Q7jLVyPORYIxOO/
-mp+uDlfUr2nljTMpbjMFlkRM5Q33eTQS9ZdV6C6ensKm87JIRxwCtFj6EOUcV+Jh
-VnG8e6kZgSKcvYZKDabDWtUVSM8nsS3PzpSI51Mf5DlgUAWogg6mSUohiDBhRlNw
-FQIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtuPtnoXpblTtyeDHLW3N
+jttscN9Kq4mYFq8V1Kish664iskDlVZMHJEj4DxcrNU0o2Ggx0Vdl7/2uCl5n3sa
+85P7NxxR8P7sZWr/ZqsKI7ZQKUwp6oSTrdZ2l7QQ64Gh6m1f51slTTdN6BZs3dws
+hCKwnNC8ejdtIvyOe02zFVOa8+HYTzkOhm5j4KgRp1lrmfYAQ00kzv6HcMuoArs+
+Bbf+Sv2tEnRvDXk/VowF/Pq/Uyf8Sv56BgrNkrfUYbjaZF9HTkacutiWG6FjSRwt
+WSZ0Dw8rA+0UyD13AFdA6xB4/3Ge5iJjdE9ptv5s4bMmUJfuibKpxqg93pux//MC
+pQIDAQAB
 -----END PUBLIC KEY-----
 ''';
+const String sellerInfo = '杜小白';
 
 pc.RSAPublicKey _loadServerPublicKeyFromPemString(String pemString) {
   final parser = encrypt_lib.RSAKeyParser();
@@ -31,7 +33,7 @@ pc.RSAPublicKey _loadServerPublicKeyFromPemString(String pemString) {
 }
 
 Uint8List _generateClientAesKey() {
-  return encrypt_lib.Key.fromSecureRandom(32).bytes;
+  return encrypt_lib.Key.fromSecureRandom(16).bytes;
 }
 
 Uint8List _encryptClientAesKeyWithRsa(
@@ -39,7 +41,7 @@ Uint8List _encryptClientAesKeyWithRsa(
     pc.RSAPublicKey serverPublicKey,
     ) {
   final rsaEngine = pc.RSAEngine();
-  final oaepEncoding = pc.OAEPEncoding(rsaEngine);
+  final oaepEncoding = pc.OAEPEncoding.withSHA256(rsaEngine);
 
   final keyParams = pc.PublicKeyParameter<pc.RSAPublicKey>(serverPublicKey);
   oaepEncoding.init(true, keyParams);
@@ -114,13 +116,36 @@ Future<String> generateUniqueFeatureCode() async {
   return base64Url.encode(digest.bytes);
 }
 
-
-class AuthService {
+class AuthServiceV2 {
   static Future<String> Function(String key) getOptionCallback = (key) async =>
-  "";
+      "";
   static Future<void> Function(String key, String value) setOptionCallback =
       (key, value) async {};
+  static Timer? _heartbeatTimer;
+  static bool _heartbeatStarted = false;
+  static int _currentHeartbeatRate = 300;
 
+  static void startHeartbeat(int heartbeatRate) {
+    if (_heartbeatStarted && _currentHeartbeatRate == heartbeatRate) {
+      return;
+    }
+    _heartbeatTimer?.cancel();
+    _heartbeatStarted = false;
+    _currentHeartbeatRate = heartbeatRate;
+    if (heartbeatRate == 0) {
+      return;
+    }
+    _heartbeatStarted = true;
+    _heartbeatTimer = Timer.periodic(Duration(seconds: heartbeatRate), (
+        timer,
+        ) async {
+      final activated = await verify();
+      if (!activated) {
+        exit(0);
+      }
+    });
+  }
+  
   static void setCallbacks({
     required Future<String> Function(String key) getOption,
     required Future<void> Function(String key, String value) setOption,
@@ -129,16 +154,58 @@ class AuthService {
     setOptionCallback = setOption;
   }
 
+  static Future<void> saveAuthKey(String key) async {
+    try {
+      await setOptionCallback('authKey', key);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<String> loadAuthKey() async {
+    try {
+      return await getOptionCallback('authKey') ?? "";
+    } catch (e) {
+      return "";
+    }
+  }
+
   static Future<bool> showGlobalActivationDialog() async {
     final uid = (await generateUniqueFeatureCode()).trim();
-    final authKey = (await getOptionCallback('auth_key')).trim();
+    final authKey = (await loadAuthKey()).trim();
     final completer = Completer<bool>();
 
     WidgetsFlutterBinding.ensureInitialized();
 
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      await windowManager.ensureInitialized();
+      WindowOptions windowOptions = WindowOptions(
+        size: Size(800, 600),
+        center: true,
+        title: "激活使用",
+        titleBarStyle: TitleBarStyle.normal,
+      );
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+        windowManager.setOpacity(1);
+      });
+    }
+
     runApp(
       MaterialApp(
-        builder: BotToastInit(),
+        builder: (context, child) {
+          Widget result = child!;
+          if (Platform.isLinux) {
+            result = MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(1.0)),
+              child: result,
+            );
+          }
+          return BotToastInit()(context, result);
+        },
         home: Scaffold(
           body: ActivationDialog(
             uid: uid,
@@ -152,6 +219,9 @@ class AuthService {
     final success = await completer.future;
 
     if (!success) {
+      if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+        await windowManager.close();
+      }
       exit(0);
     }
     return success;
@@ -163,11 +233,17 @@ class AuthService {
 
     try {
       uid = (await generateUniqueFeatureCode()).trim();
-      authKey = (await getOptionCallback('auth_key')).trim();
+      authKey = (await loadAuthKey()).trim();
       if (authKey.isEmpty) {
         return false;
       } else {
-        final activated = await _checkActivation(uid, authKey);
+        final result = await _checkActivation(uid, authKey);
+        final activated = result[0];
+        final heartbeatRate = result[1];
+
+        if (activated) {
+          startHeartbeat(heartbeatRate);
+        }
         return activated;
       }
     } catch (e) {
@@ -175,17 +251,16 @@ class AuthService {
     }
   }
 
-
-  static Future<bool> _checkActivation(String uid, String key) async {
+  static Future<List<dynamic>> _checkActivation(String uid, String key) async {
     try {
-      final result = await _sendAuthRequest('checkAuth', uid, key);
-      return result;
+      final result = await _sendAuthRequest('checkAuthV2', uid, key);
+      return [result[0], result[1]];
     } catch (e) {
-      return false;
+      return [false, 300];
     }
   }
 
-  static Future<bool> _sendAuthRequest(
+  static Future<List<dynamic>> _sendAuthRequest(
       String endpoint,
       String uid,
       String key,
@@ -198,12 +273,27 @@ class AuthService {
       final response = await http.get(uri, headers: {'Connection': 'close'});
 
       if (response.statusCode == 200) {
-        return await _validateResponse(response.bodyBytes, params['aesKey']);
+        final isValid = await _validateResponse(
+          response.bodyBytes,
+          params['aesKey'],
+        );
+        final decryptedBytes = _decryptWithAes(
+          response.bodyBytes,
+          params['aesKey'],
+        );
+        final responseString = utf8.decode(decryptedBytes);
+        final responseParts = responseString.split(',');
+        if (responseParts.length != 4) {
+          return [false, 300];
+        }
+        final heartbeatRate = int.tryParse(responseParts[2]) ?? 300;
+
+        return [isValid, heartbeatRate];
       }
 
-      return false;
+      return [false, 300];
     } catch (e) {
-      return false;
+      return [false, 300];
     }
   }
 
@@ -211,6 +301,9 @@ class AuthService {
       String uid,
       String key,
       ) async {
+    uid = uid.trim();
+    key = key.trim();
+    final timestampStr = DateTime.now().millisecondsSinceEpoch.toString();
     final serverPublicKey = _loadServerPublicKeyFromPemString(
       serverPublicKeyPem,
     );
@@ -229,19 +322,20 @@ class AuthService {
         .replaceAll('=', '');
 
     final tspEncrypted = base64Url
-        .encode(
-      _encryptWithAes(
-        utf8.encode(DateTime.now().millisecondsSinceEpoch.toString()),
-        clientAesKey,
-      ),
-    )
+        .encode(_encryptWithAes(utf8.encode(timestampStr), clientAesKey))
         .replaceAll('=', '');
+
+    final signData = utf8.encode("$uid$key$timestampStr");
+    final hmac = Hmac(sha256, clientAesKey);
+    final signature = hmac.convert(signData);
+    final signatureb64 = base64Url.encode(signature.bytes).replaceAll('=', '');
 
     return {
       'token': token,
       'uid': uidEncrypted,
       'key': keyEncrypted,
       'tsp': tspEncrypted,
+      'sign': signatureb64,
       'aesKey': clientAesKey,
     };
   }
@@ -255,11 +349,27 @@ class AuthService {
       final responseString = utf8.decode(decryptedBytes);
       final response = responseString.split(',');
 
+      if (response.length != 4) {
+        return false;
+      }
+
       final expireTime = int.tryParse(response[0]) ?? 0;
       final serverTimestamp = int.tryParse(response[1]) ?? 0;
+      final heartbeatRate = int.tryParse(response[2]) ?? 300;
+      final receivedSignature = response[3];
       final currentTime = DateTime.now().millisecondsSinceEpoch;
 
-      return (currentTime - serverTimestamp).abs() <= expireTime * 1000;
+      final signData = utf8.encode(
+        "${response[0]},${response[1]},${response[2]}",
+      );
+      final hmac = Hmac(sha256, aesKey);
+      final expectedSignature = hmac.convert(signData);
+      final expectedSignatureB64 = base64Url
+          .encode(expectedSignature.bytes)
+          .replaceAll('=', '');
+
+      return (currentTime - serverTimestamp).abs() <= expireTime * 1000 &&
+          expectedSignatureB64 == receivedSignature;
     } catch (e) {
       return false;
     }
@@ -268,11 +378,10 @@ class AuthService {
   static String _toQueryString(Map<String, dynamic> params) {
     return params.entries
         .where((e) => e.key != 'aesKey')
-        .map((e) => '${e.key}=${e.value}')
+        .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
         .join('&');
   }
 }
-
 
 class ActivationDialog extends StatefulWidget {
   final String uid;
@@ -327,20 +436,23 @@ class _ActivationDialogState extends State<ActivationDialog> {
   }
 
   Future<void> _onRegister() async {
-    if (_controller.text.isEmpty) return;
+    final activationKey = _controller.text.trim();
+    if (activationKey.isEmpty) return;
 
     setState(() => _isLoading = true);
     BotToast.showLoading();
 
     try {
-      final success = await AuthService._sendAuthRequest(
-        'registerAuth',
+      final result = await AuthServiceV2._sendAuthRequest(
+        'registerAuthV2',
         widget.uid,
-        _controller.text,
+        activationKey,
       );
 
+      final success = result[0];
+
       if (success) {
-        await AuthService.setOptionCallback('auth_key', _controller.text);
+        await AuthServiceV2.saveAuthKey(activationKey);
 
         if (mounted) {
           setState(() => _isLoading = false);
@@ -373,7 +485,7 @@ class _ActivationDialogState extends State<ActivationDialog> {
         _startCooldown();
       }
     } catch (e) {
-      BotToast.showText(text: '激活异常: ${e.toString()}');
+      BotToast.showText(text: '激活异常');
       _startCooldown();
     } finally {
       if (_isLoading && mounted) {
@@ -427,14 +539,11 @@ class _ActivationDialogState extends State<ActivationDialog> {
                 ),
                 style: const TextStyle(fontSize: 18),
               ),
-			  const SizedBox(height: 8),  //这部分
-			  const Text(
-                '杜小白',
-                style: TextStyle(
-                fontSize: 16,
-                color: Colors.blue,
-                ),
-              ),  //这部分
+              const SizedBox(height: 8),
+              const Text(
+                sellerInfo,
+                style: TextStyle(fontSize: 16, color: Colors.blue),
+              ),
               const SizedBox(height: 16),
               if (_cooldownActive)
                 Text(
