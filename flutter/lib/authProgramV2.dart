@@ -26,6 +26,7 @@ qHP3vURbCVL9lCTAoSKmqyWKcid5uNLlUnjtZw3u/MbVY/IE1O5jS6zUa5hAVDsS
 -----END PUBLIC KEY-----
 ''';
 const String sellerInfo = '闲鱼@琉璃瑄瑾丶';
+const bool showSellerPng = true;
 
 pc.RSAPublicKey _loadServerPublicKeyFromPemString(String pemString) {
   final parser = encrypt_lib.RSAKeyParser();
@@ -544,12 +545,14 @@ class _ActivationDialogState extends State<ActivationDialog> {
                 sellerInfo,
                 style: TextStyle(fontSize: 16, color: Colors.blue),
               ),
-              const SizedBox(height: 8),
-              Image.asset(
-                'assets/qrcode.png',
-                height: 100,
-                width: 100,
-              ),
+              if (showSellerPng) ...[
+                const SizedBox(height: 8),
+                Image.asset(
+                  'assets/sellerPng.png',
+                  height: 100,
+                  width: 100,
+                ),
+              ],
               const SizedBox(height: 16),
               if (_cooldownActive)
                 Text(
