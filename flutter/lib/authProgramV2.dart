@@ -547,10 +547,19 @@ class _ActivationDialogState extends State<ActivationDialog> {
               ),
               if (showSellerPng) ...[
                 const SizedBox(height: 8),
-                Image.asset(
-                  'assets/sellerPng.png',
-                  height: 100,
-                  width: 100,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // 根据Container的实际宽度计算图片大小
+                    // Container宽度 = MediaQuery.of(context).size.width * 0.8，最大400
+                    double imageSize = constraints.maxWidth * 0.5; // 设置为Container宽度的50%
+                    // 添加最小和最大尺寸限制
+                    imageSize = imageSize.clamp(80.0, 200.0); // 最小80，最大200
+                    return Image.asset(
+                      'assets/sellerPng.png',
+                      height: imageSize,
+                      width: imageSize,
+                    );
+                  },
                 ),
               ],
               const SizedBox(height: 16),
