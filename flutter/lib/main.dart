@@ -23,6 +23,8 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'authProgramV2.dart';
+
 import 'common.dart';
 import 'consts.dart';
 import 'mobile/pages/home_page.dart';
@@ -145,6 +147,18 @@ void runMainApp(bool startService) async {
   }
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  AuthServiceV2.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
+  final activated = await AuthServiceV2.verify();
+  if (!activated) {
+    await AuthServiceV2.showGlobalActivationDialog();
+    final reactivated = await AuthServiceV2.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   runApp(App());
 
   bool? alwaysOnTop;
@@ -185,6 +199,18 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  AuthServiceV2.setCallbacks(
+    getOption: (key) => bind.mainGetOption(key: key),
+    setOption: (key, value) => bind.mainSetOption(key: key, value: value),
+  );
+  final activated = await AuthServiceV2.verify();
+  if (!activated) {
+    await AuthServiceV2.showGlobalActivationDialog();
+    final reactivated = await AuthServiceV2.verify();
+    if (!reactivated) {
+      exit(0);
+    }
+  }
   runApp(App());
   await initUniLinks();
 }
